@@ -10,11 +10,14 @@ const STATIC_ASSETS = [
   '/templates.html',
   '/manifest.json',
   '/offline.html',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/icon-72.png',
-  '/icons/icon-96.png',
-  '/icons/icon-128.png'
+  '/og-image.png',
+  '/icons/icon-72x72.png',
+  '/icons/icon-96x96.png',
+  '/icons/icon-128x128.png',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/robots.txt',
+  '/sitemap.xml'
 ];
 
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];

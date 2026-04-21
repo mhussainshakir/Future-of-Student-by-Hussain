@@ -827,30 +827,77 @@ function toggleTheme() {
   }
 })();
 
-// PWA Install
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBtnWrap').style.display = 'block';
-  // Also show floating install banner
-  const fb = document.getElementById('floatInstallBanner');
-  if(fb) fb.style.display = 'flex';
-});
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBtnWrap').style.display = 'none';
-  const fb = document.getElementById('floatInstallBanner');
-  if(fb) fb.style.display = 'none';
-  deferredPrompt = null;
-});
-document.getElementById('installBtn').addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+  // ===== PWA INSTALL =====
+  let deferredPrompt = null;
+  let isInstallPromptShown = false;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    isInstallPromptShown = true;
+    console.log('[PWA] Install prompt ready');
+    
+    const wrapper = document.getElementById('installBtnWrap');
+    if(wrapper) wrapper.style.display = 'block';
+    
+    // Also show floating install banner
+    const fb = document.getElementById('floatInstallBanner');
+    if(fb) fb.style.display = 'flex';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    console.log('[PWA] App installed successfully');
+    const wrapper = document.getElementById('installBtnWrap');
+    if(wrapper) wrapper.style.display = 'none';
+    
+    const fb = document.getElementById('floatInstallBanner');
+    if(fb) fb.style.display = 'none';
+    
     deferredPrompt = null;
-    document.getElementById('installBtnWrap').style.display = 'none';
+  });
+
+  // Install button click handler
+  const installBtn = document.getElementById('installBtn');
+  if(installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        console.log('[PWA] Install prompt triggered');
+        deferredPrompt.prompt();
+        
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`[PWA] User ${outcome === 'accepted' ? 'accepted' : 'dismissed'} install`);
+        
+        deferredPrompt = null;
+        const wrapper = document.getElementById('installBtnWrap');
+        if(wrapper) wrapper.style.display = 'none';
+      } else {
+        // Handle fallback for iOS and non-PWA browsers
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+          alert('📱 iOS Installation:\n\n1. Tap Share button at bottom\n2. Select "Add to Home Screen"\n3. Name the app and tap Add');
+        } else {
+          alert('📱 Installation:\n\nYour browser supports PWA installation.\nIf you don\'t see the install option, try:\n\n• Using a supported browser (Chrome, Edge, Firefox)\n• Reloading the page\n• Checking browser PWA settings');
+        }
+      }
+    });
   }
-});
+
+  // Show install button after service worker is ready (fallback)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(() => {
+      console.log('[PWA] Service Worker ready');
+      const wrapper = document.getElementById('installBtnWrap');
+      if (wrapper && !isInstallPromptShown) {
+        // Give beforeinstallprompt a chance to fire
+        setTimeout(() => {
+          if (!isInstallPromptShown && !window.navigator.standalone) {
+            wrapper.style.display = 'block';
+            console.log('[PWA] Showing install button (fallback)');
+          }
+        }, 1500);
+      }
+    }).catch(err => console.log('[PWA] SW error:', err));
+  }
 
 // Service Worker
 if ('serviceWorker' in navigator) {

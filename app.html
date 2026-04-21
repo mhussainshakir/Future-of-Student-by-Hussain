@@ -189,19 +189,79 @@ function downloadImage() {
 }
 
 // ===== PWA INSTALL =====
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt',(e)=>{
+let deferredPrompt = null;
+let isInstallPromptShown = false;
+
+// Show install button when beforeinstallprompt fires (Chrome, Edge, Opera)
+window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
+  isInstallPromptShown = true;
   const btn = document.getElementById('btnInstall');
-  if(btn) { btn.style.display = 'flex'; btn.title = 'Install App on your device'; }
+  if(btn) {
+    btn.style.display = 'flex';
+    btn.title = 'Install App on your device';
+    console.log('[PWA] Install prompt ready');
+  }
 });
+
+// Listen for successful installation
 window.addEventListener('appinstalled', () => {
   const btn = document.getElementById('btnInstall');
   if(btn) btn.style.display = 'none';
   deferredPrompt = null;
+  console.log('[PWA] App installed successfully');
 });
-function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>deferredPrompt=null);}}
+
+// Handle install button click
+function installApp() {
+  if (deferredPrompt) {
+    console.log('[PWA] Install prompt triggered');
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('[PWA] User accepted install');
+      } else {
+        console.log('[PWA] User dismissed install');
+      }
+      deferredPrompt = null;
+    }).catch(err => {
+      console.error('[PWA] Install error:', err);
+      deferredPrompt = null;
+    });
+  } else {
+    // Show instructions for iOS or browsers that don't support PWA install
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      alert('📱 iOS Installation:\n\n1. Tap Share button at bottom\n2. Select "Add to Home Screen"\n3. Name the app and tap Add');
+    } else {
+      alert('📱 Installation:\n\nYour browser supports PWA installation.\nIf you don\'t see the install option, try:\n\n• Using a supported browser (Chrome, Edge, Firefox)\n• Reloading the page\n• Checking browser PWA settings');
+    }
+  }
+}
+
+// Also show install button if app is installable but prompt hasn't fired yet
+// This handles some browser quirks
+document.addEventListener('DOMContentLoaded', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(() => {
+      // Show a fallback install button after service worker is ready
+      const btn = document.getElementById('btnInstall');
+      if (btn && !isInstallPromptShown) {
+        // Check if standalone mode not enabled
+        if (!window.navigator.standalone && window.matchMedia('(display-mode: standalone)').matches === false) {
+          // Give beforeinstallprompt a chance to fire
+          setTimeout(() => {
+            if (!isInstallPromptShown) {
+              btn.style.display = 'flex';
+              btn.title = 'Install App on your device';
+            }
+          }, 1000);
+        }
+      }
+    }).catch(err => console.log('[PWA] SW error:', err));
+  }
+});
 
 window.saveStudentData = saveStudentData;
 window.getStudentData = getStudentData;
