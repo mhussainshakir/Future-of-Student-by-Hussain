@@ -3,14 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Future of Student - by Hussain</title>
-<meta name="description" content="Generate school report cards and student ID cards online. 16 report card templates, 10 student card designs, auto percentage, print to PDF.">
+<title>Future of Student - Report Card & Student ID Card Generator</title>
+<meta name="description" content="Generate school report cards and student ID cards online. 16 report card templates, 10 student card designs, auto percentage calculation, print to PDF. Works offline.">
+<meta name="keywords" content="report card generator, student id card maker, marksheet generator, academic report, school report card, student card generator">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://future-of-student-by-hussain.vercel.app/app.html">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Free Report Card & Student ID Card Generator">
+<meta property="og:description" content="Generate professional report cards and student ID cards instantly with 16+10 templates.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://future-of-student-by-hussain.vercel.app/app.html">
+<meta property="og:image" content="https://future-of-student-by-hussain.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free Report Card & Student ID Card Generator">
+<meta name="twitter:description" content="Professional report cards and student ID cards with 26 templates total.">
+<meta name="twitter:image" content="https://future-of-student-by-hussain.vercel.app/og-image.png">
+
+<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f3460">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Future of Student">
+<link rel="apple-touch-icon" href="icons/icon-192x192.png">
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bebas+Neue&family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&family=Merriweather:wght@400;700&family=Montserrat:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=Oswald:wght@400;600;700&family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600;700;800&family=Raleway:wght@500;700;800&display=swap" rel="stylesheet">
 <script>
 (function(){var a=function(t,e){this._typeNumber=t,this._errorCorrectionLevel=e,this._modules=null,this._moduleCount=0,this._dataList=[]};a.prototype={addData:function(t){this._dataList.push({data:t}),this._moduleCount=0},isDark:function(t,e){return this._modules&&this._modules[t]&&this._modules[t][e]},getModuleCount:function(){return this._moduleCount},make:function(){var t=0;this._dataList.forEach(function(e){t+=e.data.length}),this._typeNumber=t<25?1:t<154?2:t<378?3:40;var e=this._typeNumber*4+17;this._moduleCount=e,this._modules=[];for(var r=0;r<e;r++){this._modules[r]=[];for(var n=0;n<e;n++)this._modules[r][n]=!1}this._modules[6][8]=!0,this._modules[7][8]=!0,this._modules[8][6]=!0,this._modules[8][7]=!0,this._modules[8][8]=!0;for(var o=0;o<8;o++){for(var i=0;i<8;i++)if(0===o||7===o||0===i||7===i)if(!(2<=o&&o<=4&&2<=i&&i<=4)){this._modules[o][i]=!0;var s=e-1-i,a=e-1-o;this._modules[s][i]=!0,this._modules[o][a]=!0}}for(var h=8;h<e-8;h++)this._modules[h][8]=!0,this._modules[8][h]=!0},getDataURL:function(){var t=this._moduleCount,e=document.createElement("canvas"),r=e.getContext("2d");e.width=2*t,e.height=2*t,r.fillStyle="#fff",r.fillRect(0,0,2*t,2*t),r.fillStyle="#000";for(var n=0;n<t;n++)for(var o=0;o<t;o++)this.isDark(n,o)&&r.fillRect(2*n,2*o,2,2);return e.toDataURL("image/png")}};window.QRCode=function(t,e){var r=new a(0,e||1);return r.addData(t),r.make(),r.getDataURL()}})();

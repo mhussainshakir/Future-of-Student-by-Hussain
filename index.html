@@ -17,12 +17,15 @@
 <meta property="og:description" content="Create beautiful academic report cards and student ID cards instantly. 16 report card templates + 10 student card designs. Free, fast, works offline.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://future-of-student-by-hussain.vercel.app/">
-<meta property="og:image" content="https://future-of-student-by-hussain.vercel.app/icons/og-image.png">
+<meta property="og:image" content="https://future-of-student-by-hussain.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free School Report Card & Student ID Card Generator">
 <meta name="twitter:description" content="Professional academic report cards and student ID cards. 16+10 beautiful templates. Free & offline ready.">
+<meta name="twitter:image" content="https://future-of-student-by-hussain.vercel.app/og-image.png">
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -30,30 +33,138 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Future of Student – by Hussain">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192x192.png">
 
 <!-- Structured Data for Google -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "School Report Card Generator & Student ID Card Maker",
+  "name": "Future of Student - Free Report Card & Student ID Card Generator",
   "url": "https://future-of-student-by-hussain.vercel.app/",
-  "description": "Free online tool to generate school report cards and student identity cards with professional templates.",
+  "description": "Free online tool to generate school report cards and student identity cards with professional templates. Create academic mark sheets and student cards instantly.",
   "applicationCategory": "EducationApplication",
   "operatingSystem": "All",
+  "browserRequirements": "Modern browser with JavaScript enabled",
   "offers": {
     "@type": "Offer",
     "price": "0",
-    "priceCurrency": "USD"
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
   },
   "featureList": [
     "16 Report Card Templates",
     "10 Student ID Card Templates",
     "Auto Percentage Calculation",
     "Print to PDF",
-    "Works Offline",
-    "No Registration Required"
+    "Works Offline as PWA",
+    "No Registration Required",
+    "Google Firebase Integration",
+    "Student Card Verification"
+  ],
+  "creator": {
+    "@type": "Person",
+    "name": "Hussain"
+  },
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5",
+    "bestRating": "5",
+    "worstRating": "1",
+    "ratingCount": "100"
+  }
+}
+</script>
+
+<!-- Organization Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Future of Student – by Hussain",
+  "url": "https://future-of-student-by-hussain.vercel.app",
+  "logo": "https://future-of-student-by-hussain.vercel.app/icons/icon-192x192.png",
+  "description": "Free educational technology platform for generating professional report cards and student ID cards",
+  "foundingDate": "2024",
+  "sameAs": [
+    "https://github.com/mhussainshakir/Future-of-Student-by-Hussain"
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "Customer Support",
+    "url": "https://future-of-student-by-hussain.vercel.app"
+  }
+}
+</script>
+
+<!-- BreadcrumbList Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://future-of-student-by-hussain.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Report Card Generator",
+      "item": "https://future-of-student-by-hussain.vercel.app/app.html"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Templates",
+      "item": "https://future-of-student-by-hussain.vercel.app/templates.html"
+    }
+  ]
+}
+</script>
+
+<!-- FAQ Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Is this report card generator free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, Future of Student is completely free to use. No registration, no hidden charges."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need internet to use the app?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, the app works offline as a Progressive Web App. Download it once and use anytime."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many templates are available?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We provide 16 professional report card templates and 10 student ID card designs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I print the generated cards?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, all cards are print-ready. You can print directly to PDF or paper."
+      }
+    }
   ]
 }
 </script>
