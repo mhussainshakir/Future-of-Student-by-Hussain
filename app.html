@@ -35,9 +35,11 @@
 <script>
 (function(){var a=function(t,e){this._typeNumber=t,this._errorCorrectionLevel=e,this._modules=null,this._moduleCount=0,this._dataList=[]};a.prototype={addData:function(t){this._dataList.push({data:t}),this._moduleCount=0},isDark:function(t,e){return this._modules&&this._modules[t]&&this._modules[t][e]},getModuleCount:function(){return this._moduleCount},make:function(){var t=0;this._dataList.forEach(function(e){t+=e.data.length}),this._typeNumber=t<25?1:t<154?2:t<378?3:40;var e=this._typeNumber*4+17;this._moduleCount=e,this._modules=[];for(var r=0;r<e;r++){this._modules[r]=[];for(var n=0;n<e;n++)this._modules[r][n]=!1}this._modules[6][8]=!0,this._modules[7][8]=!0,this._modules[8][6]=!0,this._modules[8][7]=!0,this._modules[8][8]=!0;for(var o=0;o<8;o++){for(var i=0;i<8;i++)if(0===o||7===o||0===i||7===i)if(!(2<=o&&o<=4&&2<=i&&i<=4)){this._modules[o][i]=!0;var s=e-1-i,a=e-1-o;this._modules[s][i]=!0,this._modules[o][a]=!0}}for(var h=8;h<e-8;h++)this._modules[h][8]=!0,this._modules[8][h]=!0},getDataURL:function(){var t=this._moduleCount,e=document.createElement("canvas"),r=e.getContext("2d");e.width=2*t,e.height=2*t,r.fillStyle="#fff",r.fillRect(0,0,2*t,2*t),r.fillStyle="#000";for(var n=0;n<t;n++)for(var o=0;o<t;o++)this.isDark(n,o)&&r.fillRect(2*n,2*o,2,2);return e.toDataURL("image/png")}};window.QRCode=function(t,e){var r=new a(0,e||1);return r.addData(t),r.make(),r.getDataURL()}})();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs, deleteDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDGI851rdVkwwHr8GGInCHuBucavHekg6Q",
@@ -97,6 +99,180 @@ function generateQRImage(url, width = 65) {
       else resolve(canvas.toDataURL('image/png'));
     });
   });
+}
+
+// ===== CLOUDINARY AUTO-SAVE =====
+const CLOUDINARY_CLOUD_NAME = 'duhioi7kz';
+const CLOUDINARY_UPLOAD_PRESET = 'card_generator';
+
+async function uploadCardToCloudinary(canvas, cardType, studentData) {
+  try {
+    showNotification('Uploading to cloud...', 'info');
+    
+    // Convert canvas to blob
+    const blob = await new Promise(resolve => {
+      canvas.toBlob(resolve, 'image/png', 0.95);
+    });
+    
+    const formData = new FormData();
+    formData.append('file', blob);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', 'future-of-student/cards');
+    
+    // Add metadata as tags
+    const tags = [
+      `card_type:${cardType}`,
+      `student:${studentData.name || 'unknown'}`,
+      `roll:${studentData.roll || 'unknown'}`,
+      `timestamp:${Date.now()}`
+    ];
+    formData.append('tags', tags.join(','));
+    
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: 'POST', body: formData }
+    );
+    
+    if (!response.ok) throw new Error('Upload failed');
+    
+    const data = await response.json();
+    console.log('[Cloudinary] Upload successful:', data.secure_url);
+    
+    // Save metadata to Firebase
+    await saveCardMetadata(cardType, studentData, data);
+    
+    showNotification('✓ Card saved to cloud!', 'success');
+    return data.secure_url;
+  } catch(e) {
+    console.error('[Cloudinary] Error:', e);
+    showNotification('Cloud save failed. Saved locally.', 'warning');
+    return null;
+  }
+}
+
+async function saveCardMetadata(cardType, studentData, cloudinaryData) {
+  try {
+    const metadata = {
+      cardType: cardType,
+      studentName: studentData.name || 'Unknown',
+      rollNumber: studentData.roll || '',
+      cloudinaryUrl: cloudinaryData.secure_url,
+      cloudinaryPublicId: cloudinaryData.public_id,
+      uploadedAt: new Date().toISOString(),
+      cardData: {
+        class: studentData.class || '',
+        school: studentData.school || '',
+        exam: studentData.exam || '',
+        year: studentData.year || ''
+      }
+    };
+    
+    // Save to Firebase
+    const docId = `${cardType}_${Date.now()}`;
+    await addDoc(collection(db, 'saved_cards'), metadata);
+    
+    // Also save to localStorage for offline access
+    const savedCards = JSON.parse(localStorage.getItem('savedCardsMetadata') || '[]');
+    savedCards.push(metadata);
+    localStorage.setItem('savedCardsMetadata', JSON.stringify(savedCards));
+    
+    console.log('[Metadata] Saved successfully');
+  } catch(e) {
+    console.error('[Metadata] Save error:', e);
+  }
+}
+
+async function captureAndSaveCard(elementId, cardType, studentData) {
+  try {
+    const element = document.getElementById(elementId);
+    if (!element) {
+      showNotification('Card not found', 'error');
+      return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.getElementById('btnSaveCloud');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.textContent = '⏳ Saving...';
+    }
+    
+    // Capture card as image
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      removeContainer: true
+    });
+    
+    // Upload to Cloudinary
+    const url = await uploadCardToCloudinary(canvas, cardType, studentData);
+    
+    // Re-enable button
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Save to Cloud';
+    }
+    
+    return url;
+  } catch(e) {
+    console.error('[Capture] Error:', e);
+    showNotification('Error capturing card', 'error');
+    const saveBtn = document.getElementById('btnSaveCloud');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '💾 Save to Cloud';
+    }
+  }
+}
+
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+  `;
+  
+  const colors = {
+    info: 'rgba(59, 130, 246, 0.9)',
+    success: 'rgba(34, 197, 94, 0.9)',
+    error: 'rgba(239, 68, 68, 0.9)',
+    warning: 'rgba(251, 146, 60, 0.9)'
+  };
+  
+  notification.style.backgroundColor = colors[type] || colors.info;
+  notification.style.color = 'white';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => notification.remove(), 3000);
+}
+
+// Get all saved cards
+async function getSavedCards() {
+  try {
+    const querySnapshot = await getDocs(query(
+      collection(db, 'saved_cards')
+    ));
+    
+    const cards = [];
+    querySnapshot.forEach((doc) => {
+      cards.push({ id: doc.id, ...doc.data() });
+    });
+    
+    return cards;
+  } catch(e) {
+    console.error('[SavedCards] Error:', e);
+    // Fall back to localStorage
+    return JSON.parse(localStorage.getItem('savedCardsMetadata') || '[]');
+  }
 }
 window.v = function(id) {
   const e = document.getElementById(id);
@@ -282,10 +458,13 @@ body{font-family:'Poppins',sans-serif;background:#f0f4f8;min-height:100vh;color:
 .hbtn-settings:hover{background:rgba(255,255,255,0.2)}
 .hbtn-print{background:#e94560;color:white}
 .hbtn-print:hover{background:#c23152}
-.hbtn-download{background:#28a745;color:white}
-.hbtn-download:hover{background:#1e7e34}
-.hbtn-pwa{background:#f5a623;color:#1a1a2e}
-.hbtn-pwa:hover{background:#d4941a}
+  .hbtn-cloud{background:#3b82f6;color:white}
+  .hbtn-cloud:hover{background:#2563eb}
+  .hbtn-cloud:disabled{background:#93c5fd;cursor:not-allowed}
+  .hbtn-download{background:#28a745;color:white}
+  .hbtn-download:hover{background:#1e7e34}
+  .hbtn-pwa{background:#f5a623;color:#1a1a2e}
+  .hbtn-pwa:hover{background:#d4941a}
 
 .tab-btn.active{color:#0f3460;border-bottom-color:#e94560}
 
@@ -1338,17 +1517,19 @@ body.dark .s-lbl{color:#e6edf3}
   </div>
   <div class="header-actions">
     <a href="index.html" class="hbtn hbtn-home">🏠 Home</a>
-    <button class="hbtn hbtn-settings" onclick="toggleDark()" title="Dark Mode">🌙</button>
-    <button class="hbtn hbtn-settings" onclick="openSettings()">⚙ Settings</button>
-    <button class="hbtn hbtn-download" onclick="downloadImage()" title="Download Image">📥</button>
-    <button class="hbtn hbtn-print" onclick="doPrint()">🖨 Print</button>
-    <button class="hbtn hbtn-pwa" id="btnInstall" onclick="installApp()" title="Install App on Device" style="display:none">📲 Install App</button>
+  <button class="hbtn hbtn-settings" onclick="toggleDark()" title="Dark Mode">🌙</button>
+  <button class="hbtn hbtn-settings" onclick="openSettings()">⚙ Settings</button>
+  <button class="hbtn hbtn-cloud" id="btnSaveCloud" onclick="saveCurrentCard()" title="Save to Cloud">☁ Save</button>
+  <button class="hbtn hbtn-download" onclick="downloadImage()" title="Download Image">📥</button>
+  <button class="hbtn hbtn-print" onclick="doPrint()">🖨 Print</button>
+  <button class="hbtn hbtn-pwa" id="btnInstall" onclick="installApp()" title="Install App on Device" style="display:none">📲 Install App</button>
   </div>
 </div>
 
 <div class="tab-bar">
-  <button class="tab-btn active" id="tabRc" onclick="switchTab('rc')">📋 Report Card</button>
-  <button class="tab-btn" id="tabSc" onclick="switchTab('sc')">🪪 Student ID Card</button>
+<button class="tab-btn active" id="tabRc" onclick="switchTab('rc')">📋 Report Card</button>
+<button class="tab-btn" id="tabSc" onclick="switchTab('sc')">🪪 Student ID Card</button>
+<button class="tab-btn" id="tabSaved" onclick="switchTab('saved')">💾 Saved Cards</button>
 </div>
 
 <div class="main-area">
@@ -1464,6 +1645,14 @@ body.dark .s-lbl{color:#e6edf3}
     <div class="fg"><label>Date of Issue</label><input type="date" id="sIssue" onchange="sp()"></div>
   </div>
 
+  <!-- ===== SAVED CARDS SIDEBAR ===== -->
+  <div class="sidebar hidden" id="sideSaved">
+    <div class="sec-title">My Saved Cards</div>
+    <div id="savedCardsContainer" style="display:grid;gap:12px;padding:0 8px;overflow-y:auto;max-height:calc(100vh - 200px);">
+      <p style="color:#aaa;text-align:center;padding:20px 0;">Loading saved cards...</p>
+    </div>
+  </div>
+
   <!-- ===== PREVIEW ===== -->
   <div class="preview-area" id="prevArea">
     <div id="printContent"></div>
@@ -1529,15 +1718,120 @@ let subjs = [
 let cfg = {autoGrade:true,showObs:true,showGT:true,showHolo:true,showChip:true};
 let rcPhotoData = '', scPhotoData = '';
 
-// ===== TABS =====
-function switchTab(t) {
+  // ===== TABS =====
+  function switchTab(t) {
   curTab = t;
   document.getElementById('tabRc').classList.toggle('active', t==='rc');
   document.getElementById('tabSc').classList.toggle('active', t==='sc');
+  document.getElementById('tabSaved').classList.toggle('active', t==='saved');
   document.getElementById('sideRc').classList.toggle('hidden', t!=='rc');
   document.getElementById('sideSc').classList.toggle('hidden', t!=='sc');
-  t==='rc' ? rp() : sp();
-}
+  document.getElementById('sideSaved').classList.toggle('hidden', t!=='saved');
+  
+  if(t==='rc') rp();
+  else if(t==='sc') sp();
+  else if(t==='saved') loadSavedCards();
+  }
+
+  // ===== SAVE CURRENT CARD TO CLOUD =====
+  async function saveCurrentCard() {
+    try {
+      if (curTab === 'rc') {
+        // Save Report Card
+        const studentData = {
+          name: v('rName') || 'Unknown',
+          roll: v('rRoll') || '',
+          class: v('rClass') || '',
+          school: v('rSch') || '',
+          exam: v('rExam') || '',
+          year: v('rYear') || ''
+        };
+        
+        await captureAndSaveCard('rcPreview', 'report_card', studentData);
+      } else {
+        // Save Student ID Card
+        const studentData = {
+          name: v('sName') || 'Unknown',
+          roll: v('sRoll') || '',
+          class: v('sClass') || '',
+          school: v('sSch') || '',
+          dob: v('sDOB') || '',
+          blood: v('sBlood') || ''
+        };
+        
+        await captureAndSaveCard('scPreview', 'student_card', studentData);
+      }
+    } catch(e) {
+      console.error('[SaveCard] Error:', e);
+      showNotification('Error saving card', 'error');
+    }
+  }
+
+  // ===== LOAD AND DISPLAY SAVED CARDS =====
+  async function loadSavedCards() {
+    try {
+      const container = document.getElementById('savedCardsContainer');
+      const cards = await getSavedCards();
+      
+      if (!cards || cards.length === 0) {
+        container.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px 0;">No saved cards yet.<br>Generate and save cards to see them here!</p>';
+        return;
+      }
+      
+      const html = cards.map((card, idx) => `
+        <div style="background:#f5f5f5;border-radius:8px;padding:12px;border:1px solid #ddd;">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px;">
+            ${card.cardType === 'report_card' ? '📋' : '🪪'} ${card.studentName}
+          </div>
+          <div style="font-size:12px;color:#666;margin-bottom:8px;line-height:1.4;">
+            Roll: ${card.rollNumber}<br>
+            Class: ${card.cardData?.class || 'N/A'}<br>
+            Saved: ${new Date(card.uploadedAt).toLocaleDateString()}
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button style="flex:1;padding:6px;font-size:11px;background:#0f3460;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;" onclick="viewSavedCard('${card.cloudinaryUrl}')">👁 View</button>
+            <button style="flex:1;padding:6px;font-size:11px;background:#28a745;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;" onclick="downloadSavedCard('${card.cloudinaryUrl}','${card.studentName}')">📥 Download</button>
+            <button style="flex:1;padding:6px;font-size:11px;background:#e94560;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;" onclick="deleteSavedCard('${idx}')">🗑 Delete</button>
+          </div>
+        </div>
+      `).join('');
+      
+      container.innerHTML = html;
+    } catch(e) {
+      console.error('[LoadSavedCards] Error:', e);
+      document.getElementById('savedCardsContainer').innerHTML = '<p style="color:red;padding:10px;">Error loading cards. Try refreshing.</p>';
+    }
+  }
+
+  // ===== SAVE CARD UTILITIES =====
+  function viewSavedCard(url) {
+    window.open(url, '_blank');
+  }
+
+  function downloadSavedCard(url, name) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${name.replace(/\s+/g, '_')}_${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  async function deleteSavedCard(idx) {
+    if (!confirm('Delete this saved card?')) return;
+    
+    try {
+      const savedCards = JSON.parse(localStorage.getItem('savedCardsMetadata') || '[]');
+      savedCards.splice(idx, 1);
+      localStorage.setItem('savedCardsMetadata', JSON.stringify(savedCards));
+      
+      loadSavedCards();
+      showNotification('Card deleted', 'success');
+    } catch(e) {
+      console.error('[DeleteCard] Error:', e);
+      showNotification('Error deleting card', 'error');
+    }
+  }
 function setRcT(n,btn){rcT=n;document.querySelectorAll('#sideRc .tmpl-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rp();}
 function setScT(n,btn){scT=n;document.querySelectorAll('#sideSc .tmpl-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');sp();}
 
