@@ -1,10 +1,23 @@
+# robots.txt for Future of Student - Report Card Generator
+# Allow all search engines to crawl all content
+
 User-agent: *
 Allow: /
 Allow: /index.html
 Allow: /app.html
 Allow: /view.html
 Allow: /templates.html
+Allow: /offline.html
+Allow: /manifest.json
+Allow: /og-image.png
+Allow: /icons/
 
 Disallow: /print/
 
+# Specific rules for Googlebot (more aggressive crawling allowed)
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Sitemap location for all search engines
 Sitemap: https://future-of-student-by-hussain.vercel.app/sitemap.xml
