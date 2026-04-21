@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Verification</title>
+<meta name="description" content="Verify student ID card">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f3460">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#0f3460,#16213e);min-height:100vh;color:#1a1a2e}
+.header{background:linear-gradient(135deg,#e94560,#f5a623);padding:20px;text-align:center;color:white}
+.header h1{font-family:'Oswald',sans-serif;font-size:28px;letter-spacing:1px}
+.container{max-width:500px;margin:30px auto;padding:0 16px}
+.card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
+.card-header{background:linear-gradient(135deg,#0f3460,#1a5276);padding:24px;text-align:center;color:white}
+.card-header .verify-icon{width:60px;height:60px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px}
+.card-header h2{font-family:'Oswald',sans-serif;font-size:22px}
+.card-header .roll{font-size:13px;opacity:0.8;margin-top:4px}
+.card-body{padding:24px}
+.info-row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f0f0f0}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:13px;color:#888;font-weight:500}
+.info-value{font-size:14px;font-weight:700;color:#1a1a2e}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600}
+.status-badge.active{background:#d4edda;color:#155724}
+.status-badge.expired{background:#f8d7da;color:#721c24}
+.status-badge.pending{background:#fff3cd;color:#856404}
+.photo-box{width:100px;height:120px;border:2px solid #0f3460;border-radius:8px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:#f8f9fa}
+.footer{padding:24px;text-align:center;color:rgba(255,255,255,0.7);font-size:13px}
+.loader{border:4px solid rgba(255,255,255,0.3);border-top:4px solid #e94560;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:40px auto}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.error-msg{background:#fee;border:2px solid #fcc;border-radius:12px;padding:24px;text-align:center;color:#721c24}
+.error-msg h3{font-size:18px;margin-bottom:8px}
+.error-msg p{font-size:14px}
+.not-found{text-align:center;padding:40px}
+.not-found .icon{font-size:48px;margin-bottom:16px}
+.not-found h3{color:#1a1a2e;margin-bottom:8px}
+.not-found p{color:#888;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎓 Student Card</h1>
+</div>
+
+<div class="container">
+  <div id="loader" class="loader"></div>
+  
+  <div id="notFound" class="not-found" style="display:none">
+    <div class="icon">❓</div>
+    <h3>Student Not Found</h3>
+    <p>No record found for this Roll Number.</p>
+  </div>
+  
+  <div id="studentCard" class="card" style="display:none">
+    <div class="card-header">
+      <div class="verify-icon">✓</div>
+      <h2>VERIFIED STUDENT</h2>
+      <div class="roll" id="dispRoll"></div>
+    </div>
+    <div class="card-body">
+      <div class="info-row">
+        <span class="info-label">Student Name</span>
+        <span class="info-value" id="dispName"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Father Name</span>
+        <span class="info-value" id="dispFather"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Class</span>
+        <span class="info-value" id="dispClass"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Blood Group</span>
+        <span class="info-value" id="dispBlood"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Date of Birth</span>
+        <span class="info-value" id="dispDob"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">School</span>
+        <span class="info-value" id="dispSchool"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Date of Issue</span>
+        <span class="info-value" id="dispIssue"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Expiry Date</span>
+        <span class="info-value" id="dispExpiry"></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status</span>
+        <span id="dispStatus"></span>
+      </div>
+    </div>
+  </div>
+  
+  <div id="errorCard" class="error-msg" style="display:none">
+    <h3>⚠ Error</h3>
+    <p>Unable to verify student. Please try again.</p>
+  </div>
+</div>
+
+<div class="footer">
+  <p>Future of Student – by Hussain</p>
+  <p style="margin-top:4px;font-size:11px">Verify Student ID</p>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDGI851rdVkwwHr8GGInCHuBucavHekg6Q",
+  authDomain: "report-card-generater.firebaseapp.com",
+  projectId: "report-card-generater",
+  storageBucket: "report-card-generater.firebasestorage.app",
+  messagingSenderId: "51444069083",
+  appId: "1:51444069083:web:ae1fdf4c752520c2c392fe"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function fmtDate(ds) {
+  if (!ds) return 'N/A';
+  try {
+    return new Date(ds).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch(e) { return ds; }
+}
+
+function checkExpiry(exp) {
+  if (!exp) return { text: 'Unknown', cls: 'pending' };
+  try {
+    const expDate = new Date(exp);
+    const today = new Date();
+    if (expDate >= today) return { text: 'Active', cls: 'active' };
+    return { text: 'Expired', cls: 'expired' };
+  } catch(e) { return { text: 'Unknown', cls: 'pending' }; }
+}
+
+async function loadStudent() {
+  const params = new URLSearchParams(window.location.search);
+  const roll = params.get('id');
+  
+  if (!roll) {
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('notFound').style.display = 'block';
+    return;
+  }
+  
+  try {
+    const docSnap = await getDoc(doc(db, "students", roll));
+    
+    document.getElementById('loader').style.display = 'none';
+    
+    if (!docSnap.exists()) {
+      document.getElementById('notFound').style.display = 'block';
+      return;
+    }
+    
+    const data = docSnap.data();
+    const status = checkExpiry(data.expiryDate);
+    
+    document.getElementById('dispRoll').textContent = 'Roll # ' + roll;
+    document.getElementById('dispName').textContent = data.name || 'N/A';
+    document.getElementById('dispFather').textContent = data.father || 'N/A';
+    document.getElementById('dispClass').textContent = data.class || 'N/A';
+    document.getElementById('dispBlood').textContent = data.blood || 'N/A';
+    document.getElementById('dispDob').textContent = fmtDate(data.dob);
+    document.getElementById('dispSchool').textContent = data.school || 'N/A';
+    document.getElementById('dispIssue').textContent = fmtDate(data.issueDate);
+    document.getElementById('dispExpiry').textContent = fmtDate(data.expiryDate);
+    document.getElementById('dispStatus').innerHTML = `<span class="status-badge ${status.cls}">${status.text}</span>`;
+    
+    document.getElementById('studentCard').style.display = 'block';
+    
+  } catch(e) {
+    console.log("Error:", e);
+    document.getElementById('errorCard').style.display = 'block';
+  }
+}
+
+loadStudent();
+</script>
+</body>
+</html>

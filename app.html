@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Future of Student - by Hussain</title>
+<meta name="description" content="Generate school report cards and student ID cards online. 16 report card templates, 10 student card designs, auto percentage, print to PDF.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://future-of-student-by-hussain.vercel.app/app.html">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f3460">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bebas+Neue&family=Cinzel:wght@500;700&family=Cormorant+Garamond:wght@500;700&family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&family=Merriweather:wght@400;700&family=Montserrat:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=Oswald:wght@400;600;700&family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600;700;800&family=Raleway:wght@500;700;800&display=swap" rel="stylesheet">
+<script>
+(function(){var a=function(t,e){this._typeNumber=t,this._errorCorrectionLevel=e,this._modules=null,this._moduleCount=0,this._dataList=[]};a.prototype={addData:function(t){this._dataList.push({data:t}),this._moduleCount=0},isDark:function(t,e){return this._modules&&this._modules[t]&&this._modules[t][e]},getModuleCount:function(){return this._moduleCount},make:function(){var t=0;this._dataList.forEach(function(e){t+=e.data.length}),this._typeNumber=t<25?1:t<154?2:t<378?3:40;var e=this._typeNumber*4+17;this._moduleCount=e,this._modules=[];for(var r=0;r<e;r++){this._modules[r]=[];for(var n=0;n<e;n++)this._modules[r][n]=!1}this._modules[6][8]=!0,this._modules[7][8]=!0,this._modules[8][6]=!0,this._modules[8][7]=!0,this._modules[8][8]=!0;for(var o=0;o<8;o++){for(var i=0;i<8;i++)if(0===o||7===o||0===i||7===i)if(!(2<=o&&o<=4&&2<=i&&i<=4)){this._modules[o][i]=!0;var s=e-1-i,a=e-1-o;this._modules[s][i]=!0,this._modules[o][a]=!0}}for(var h=8;h<e-8;h++)this._modules[h][8]=!0,this._modules[8][h]=!0},getDataURL:function(){var t=this._moduleCount,e=document.createElement("canvas"),r=e.getContext("2d");e.width=2*t,e.height=2*t,r.fillStyle="#fff",r.fillRect(0,0,2*t,2*t),r.fillStyle="#000";for(var n=0;n<t;n++)for(var o=0;o<t;o++)this.isDark(n,o)&&r.fillRect(2*n,2*o,2,2);return e.toDataURL("image/png")}};window.QRCode=function(t,e){var r=new a(0,e||1);return r.addData(t),r.make(),r.getDataURL()}})();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDGI851rdVkwwHr8GGInCHuBucavHekg6Q",
+  authDomain: "report-card-generater.firebaseapp.com",
+  projectId: "report-card-generater",
+  storageBucket: "report-card-generater.firebasestorage.app",
+  messagingSenderId: "51444069083",
+  appId: "1:51444069083:web:ae1fdf4c752520c2c392fe"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function saveStudentData(data) {
+  if (!data.roll) return;
+  try {
+    await setDoc(doc(db, "students", data.roll), {
+      name: data.name,
+      father: data.father,
+      blood: data.blood,
+      class: data.class,
+      dob: data.dob,
+      school: data.school,
+      issueDate: data.issueDate,
+      expiryDate: data.expiryDate,
+      createdAt: new Date().toISOString()
+    }, { merge: true });
+    console.log("Data saved for roll:", data.roll);
+  } catch(e) { console.log("Save error:", e); }
+}
+
+async function getStudentData(roll) {
+  try {
+    const docSnap = await getDoc(doc(db, "students", roll));
+    if (docSnap.exists()) return docSnap.data();
+  } catch(e) { console.log("Error:", e); }
+  return null;
+}
+
+function generateCardQR(containerId, url) {
+  const container = document.getElementById(containerId);
+  if (container && url) {
+    container.innerHTML = '';
+    var img = new Image();
+    img.src = QRCode(url);
+    img.style.width = '60px';
+    img.style.height = '60px';
+    container.appendChild(img);
+  }
+}
+
+function generateQRImage(url, width = 65) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    QRCode.toCanvas(canvas, url, { width: width, margin: 1, color: { dark: "#000", light: "#fff" } }, function(error) {
+      if (error) resolve('');
+      else resolve(canvas.toDataURL('image/png'));
+    });
+  });
+}
+window.v = function(id) {
+  const e = document.getElementById(id);
+  return e ? e.value : '';
+};
+
+// ===== LOCAL STORAGE =====
+function saveToLocal() {
+  try {
+    const data = {
+      // Report card fields
+      rRoll:v('rRoll'), rName:v('rName'), rFather:v('rFather'),
+      rClass:v('rClass'), rYear:v('rYear'), rExam:v('rExam'),
+      rSch:v('rSch'), rTag:v('rTag'), rRem:v('rRem'), rGrade:v('rGrade'),
+      oAtt:v('oAtt'), oHW:v('oHW'), oHWr:v('oHWr'),
+      oUni:v('oUni'), oHN:v('oHN'), oSh:v('oSh'),
+      // Student card fields
+      sRoll:v('sRoll'), sName:v('sName'), sFather:v('sFather'),
+      sClass:v('sClass'), sClNum:v('sClNum'), sSchool:v('sSchool'),
+      sBlood:v('sBlood'), sDob:v('sDob'), sIssue:v('sIssue'),
+      // Shared
+      subjects: window.subjs,
+      // Templates
+      rcTemplate: window.rcT,
+      scTemplate: window.scT,
+      // Settings
+      sLogo:v('sLogo'), sHdrName:v('sHdrName'),
+      // Grades
+      g90:v('g90'),g80:v('g80'),g70:v('g70'),g60:v('g60'),g50:v('g50'),g0:v('g0'),
+    };
+    localStorage.setItem('fos_data', JSON.stringify(data));
+  } catch(e) {}
+}
+function loadFromLocal() {
+  try {
+    // Support both old key and new key
+    const raw = localStorage.getItem('fos_data') || localStorage.getItem('futureStudentData');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    const setV = (id, val) => { const el = document.getElementById(id); if(el && val !== undefined && val !== null && val !== '') el.value = val; };
+    // RC fields
+    setV('rRoll',   d.rRoll   || d.roll);
+    setV('rName',   d.rName   || d.name);
+    setV('rFather', d.rFather || d.father);
+    setV('rClass',  d.rClass  || d.class);
+    setV('rYear',   d.rYear   || d.year);
+    setV('rExam',   d.rExam);
+    setV('rSch',    d.rSch    || d.school);
+    setV('rTag',    d.rTag);
+    setV('rRem',    d.rRem);
+    setV('rGrade',  d.rGrade);
+    setV('oAtt',d.oAtt);setV('oHW',d.oHW);setV('oHWr',d.oHWr);
+    setV('oUni',d.oUni);setV('oHN',d.oHN);setV('oSh',d.oSh);
+    // SC fields
+    setV('sRoll',   d.sRoll   || d.roll);
+    setV('sName',   d.sName   || d.name);
+    setV('sFather', d.sFather || d.father);
+    setV('sClass',  d.sClass  || d.class);
+    setV('sClNum',  d.sClNum);
+    setV('sSchool', d.sSchool || d.school);
+    setV('sBlood',  d.sBlood);
+    setV('sDob',    d.sDob);
+    // Grade inputs
+    setV('g90',d.g90);setV('g80',d.g80);setV('g70',d.g70);
+    setV('g60',d.g60);setV('g50',d.g50);setV('g0',d.g0);
+    // Settings
+    setV('sLogo',   d.sLogo);
+    setV('sHdrName',d.sHdrName);
+    // Subjects
+    if (d.subjects && d.subjects.length) { window.subjs = d.subjects; renderSubjs(); }
+    // Restore templates (done after DOM ready)
+    if (d.rcTemplate) window._savedRcT = parseInt(d.rcTemplate);
+    if (d.scTemplate) window._savedScT = parseInt(d.scTemplate);
+  } catch(e) {}
+}
+function saveLocalAuto() { try{saveToLocal()}catch(e){} }
+
+// ===== DARK MODE =====
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark') ? 'on' : 'off');
+}
+(function(){
+  if(localStorage.getItem('darkMode')==='on') document.body.classList.add('dark');
+})();
+
+// ===== DOWNLOAD AS IMAGE =====
+function downloadImage() {
+  doPrint();
+}
+
+// ===== PWA INSTALL =====
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('btnInstall');
+  if(btn) { btn.style.display = 'flex'; btn.title = 'Install App on your device'; }
+});
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('btnInstall');
+  if(btn) btn.style.display = 'none';
+  deferredPrompt = null;
+});
+function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>deferredPrompt=null);}}
+
+window.saveStudentData = saveStudentData;
+window.getStudentData = getStudentData;
+window.db = db;
+window.generateCardQR = generateCardQR;
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:#f0f4f8;min-height:100vh;color:#1a1a2e}
+.app-header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:white;padding:14px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,0.3)}
+.app-logo{width:46px;height:46px;background:linear-gradient(135deg,#e94560,#f5a623);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;font-family:'Oswald',sans-serif;flex-shrink:0}
+.app-title{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;letter-spacing:1px}
+.app-subtitle{font-size:10px;opacity:0.65;margin-top:1px}
+.header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hbtn-home{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2)}
+.hbtn-home:hover{background:rgba(255,255,255,0.2)}
+.hbtn-settings{background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2)}
+.hbtn-settings:hover{background:rgba(255,255,255,0.2)}
+.hbtn-print{background:#e94560;color:white}
+.hbtn-print:hover{background:#c23152}
+.hbtn-download{background:#28a745;color:white}
+.hbtn-download:hover{background:#1e7e34}
+.hbtn-pwa{background:#f5a623;color:#1a1a2e}
+.hbtn-pwa:hover{background:#d4941a}
+
+.tab-btn.active{color:#0f3460;border-bottom-color:#e94560}
+
+.main-area{display:flex;height:calc(100vh - 108px)}
+
+.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#aaa;margin-bottom:10px;margin-top:18px;padding-bottom:4px;border-bottom:1px solid #f0f0f0}
+.sec-title:first-child{margin-top:0}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:11px;font-weight:600;color:#555;margin-bottom:3px}
+.fg input,.fg select,.fg textarea{width:100%;padding:7px 9px;border:1.5px solid #e5e5e5;border-radius:7px;font-family:'Poppins',sans-serif;font-size:12px;color:#333;outline:none;transition:border 0.2s;background:white}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#0f3460}
+.fg textarea{resize:vertical;min-height:56px;line-height:1.5}
+.row2{display:flex;gap:8px}
+.row2 .fg{flex:1}
+
+.tmpl-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
+.tmpl-btn{padding:8px 6px;border:2px solid #e5e5e5;border-radius:8px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;background:white;color:#666;transition:all 0.2s;text-align:center;line-height:1.3}
+.tmpl-btn.active{border-color:#e94560;color:#e94560;background:#fff5f7}
+.tmpl-btn:hover:not(.active){border-color:#0f3460;color:#0f3460}
+
+.subj-table{width:100%;border-collapse:collapse;font-size:11px}
+.subj-table th{background:#f7f8fa;padding:6px 6px;text-align:left;font-weight:700;color:#555;border-bottom:1.5px solid #e8e8e8;font-size:10px}
+.subj-table td{padding:3px 3px;border-bottom:1px solid #f5f5f5}
+.subj-table input{width:100%;padding:4px 5px;border:1.5px solid #e5e5e5;border-radius:5px;font-size:11px;font-family:'Poppins',sans-serif;background:white;outline:none}
+.subj-table input:focus{border-color:#0f3460}
+.add-btn{width:100%;padding:8px;background:#f5f8ff;border:1.5px dashed #b0c4de;border-radius:7px;font-size:12px;font-weight:600;color:#0f3460;cursor:pointer;margin-top:7px;transition:all 0.2s}
+.add-btn:hover{background:#e8f0fd;border-color:#0f3460}
+.rm-btn{background:none;border:none;color:#e94560;cursor:pointer;font-size:13px;padding:0 3px;line-height:1}
+
+.obs-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.obs-item label{font-size:10px;font-weight:600;color:#777;display:block;margin-bottom:2px}
+.obs-item input{width:100%;padding:5px 6px;border:1.5px solid #e5e5e5;border-radius:6px;font-size:11px;font-family:'Poppins',sans-serif;outline:none}
+.obs-item input:focus{border-color:#0f3460}
+
+.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:9px 12px;font-size:11px;color:#1e40af;line-height:1.5;margin-bottom:10px}
+
+/* PRINT AREA */
+.print-wrapper{background:white;box-shadow:0 4px 32px rgba(0,0,0,0.18);border-radius:10px;overflow:hidden;width:fit-content}
+.print-label{font-size:11px;font-weight:700;color:#888;text-align:center;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}
+
+/* ======= REPORT CARD TEMPLATES ======= */
+.rc{font-family:'Poppins',sans-serif;width:700px;min-height:960px;background:white}
+
+/* T1 Navy */
+.rc-t1 .rch{background:linear-gradient(135deg,#1a3a6e,#2e5daa);color:white;padding:22px;text-align:center}
+.rc-t1 .rch .sn{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;letter-spacing:2px}
+.rc-t1 .rch .st{font-size:11px;opacity:0.75;margin-top:4px;letter-spacing:3px;text-transform:uppercase}
+.rc-t1 .rch .badge{display:inline-block;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);padding:5px 22px;border-radius:20px;font-size:12px;margin-top:10px;font-weight:700;letter-spacing:1px}
+.rc-t1 .tbl-hdr th{background:#1a3a6e;color:white;border:1px solid #2e5daa}
+.rc-t1 .tbl-hdr td,.rc-t1 .tbl-body td{border:1px solid #c8d8f0}
+.rc-t1 .tbl-body tr:nth-child(even) td{background:#f0f5fc}
+.rc-t1 .pbar{background:#e8f0fb;border:1.5px solid #1a3a6e}
+.rc-t1 .pbar-txt{color:#1a3a6e}
+
+/* T2 Orange */
+.rc-t2 .rch{background:#f8f9fa;border-bottom:4px solid #ff6b35;padding:22px;display:flex;align-items:center;gap:18px}
+.rc-t2 .rch .logo{width:66px;height:66px;background:linear-gradient(135deg,#ff6b35,#f7c948);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:white;font-family:'Oswald',sans-serif;flex-shrink:0}
+.rc-t2 .rch .sn{font-size:24px;font-weight:800;color:#2d3436;font-family:'Nunito',sans-serif}
+.rc-t2 .rch .st{font-size:11px;color:#636e72;margin-top:2px;letter-spacing:1px}
+.rc-t2 .rch .badge{display:inline-block;background:#ff6b35;color:white;padding:4px 16px;border-radius:4px;font-size:11px;margin-top:6px;font-weight:700}
+.rc-t2 .tbl-hdr th{background:#ff6b35;color:white;border:1px solid #e85f2a}
+.rc-t2 .tbl-body td{border:1px solid #ffe0d0}
+.rc-t2 .tbl-body tr:nth-child(even) td{background:#fff8f5}
+.rc-t2 .pbar{background:#fff3ed;border:1.5px solid #ff6b35}
+.rc-t2 .pbar-txt{color:#d4520a}
+
+/* T3 Green */
+.rc-t3{border:8px solid #2d6a4f;font-family:'Merriweather',serif}
+.rc-t3 .rch{background:#2d6a4f;color:white;padding:22px;text-align:center}
+.rc-t3 .rch .sn{font-size:26px;font-weight:700;letter-spacing:1px}
+.rc-t3 .rch .st{font-size:10px;opacity:0.8;margin-top:4px;font-style:italic;letter-spacing:2px}
+.rc-t3 .rch .badge{display:inline-block;background:white;color:#2d6a4f;padding:5px 20px;border-radius:2px;font-size:11px;margin-top:8px;font-weight:700;font-family:'Poppins',sans-serif}
+.rc-t3 .tbl-hdr th{background:#2d6a4f;color:white;border:1px solid #1b4332}
+.rc-t3 .tbl-body td{border:1px solid #b7e4c7}
+.rc-t3 .tbl-body tr:nth-child(even) td{background:#f0fdf4}
+.rc-t3 .pbar{background:#f0fdf4;border:1.5px solid #2d6a4f}
+.rc-t3 .pbar-txt{color:#1a5c38}
+
+/* T4 Dark */
+.rc-t4{background:#1a1a2e;color:white;font-family:'Oswald',sans-serif}
+.rc-t4 .rch{background:linear-gradient(135deg,#e94560,#8b0000);padding:24px;text-align:center}
+.rc-t4 .rch .sn{font-size:30px;font-weight:700;letter-spacing:3px}
+.rc-t4 .rch .st{font-size:11px;opacity:0.8;margin-top:4px;letter-spacing:4px;color:#ffd700}
+.rc-t4 .rch .badge{display:inline-block;background:#ffd700;color:#1a1a2e;padding:5px 20px;border-radius:2px;font-size:12px;margin-top:8px;font-weight:700}
+.rc-t4 .rc-info-sec{border-color:#333}
+.rc-t4 .rc-info-sec .lbl{color:#ccc}
+.rc-t4 .rc-info-sec .val{border-color:#555;color:white}
+.rc-t4 .tbl-hdr th{background:#e94560;color:white;border:1px solid #c23152}
+.rc-t4 .tbl-body td{border:1px solid #2a2a45;color:white;background:#1f1f38}
+.rc-t4 .tbl-body tr:nth-child(even) td{background:#252545}
+.rc-t4 .pbar{background:#252545;border:1.5px solid #e94560;color:white}
+.rc-t4 .pbar-txt{color:#ffd700}
+.rc-t4 .footer-sec{color:#ccc}
+.rc-t4 .footer-sec .lbl2{color:#aaa}
+.rc-t4 .sig-line{border-color:#555}
+.rc-t4 .rc-photo-box{background:#252545;border-color:#4a4a70;color:#d6d6df}
+
+/* T5 Gradient */
+.rc-t5 .rch{background:linear-gradient(135deg,#7c3aed,#db2777);color:white;padding:24px;text-align:center;clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%);padding-bottom:52px}
+.rc-t5 .rch .sn{font-size:28px;font-weight:700;letter-spacing:2px}
+.rc-t5 .rch .st{font-size:11px;opacity:0.8;margin-top:4px}
+.rc-t5 .rch .badge{display:inline-block;background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.4);padding:5px 22px;border-radius:20px;font-size:12px;margin-top:10px;font-weight:600}
+.rc-t5 .tbl-hdr th{background:linear-gradient(135deg,#7c3aed,#db2777);color:white;border:none}
+.rc-t5 .tbl-body td{border:1px solid #e9d5ff}
+.rc-t5 .tbl-body tr:nth-child(even) td{background:#faf5ff}
+.rc-t5 .pbar{background:linear-gradient(135deg,#f5f3ff,#fdf2f8);border:1.5px solid #7c3aed}
+.rc-t5 .pbar-txt{color:#7c3aed}
+
+/* T6 Royal Blue */
+.rc-t6{
+  background:white;
+  border:8px double #0044cc;
+  box-shadow:inset 0 0 0 2px rgba(0,68,204,0.12);
+}
+.rc-t6 .rch{
+  padding:18px 20px 12px;
+  text-align:center;
+}
+.rc-t6 .rch .sn{
+  font-family:'Oswald',sans-serif;
+  font-size:40px;
+  color:#d32f2f;
+  font-weight:700;
+  letter-spacing:1px;
+}
+.rc-t6 .rch .st{
+  font-family:'Nunito',sans-serif;
+  font-size:20px;
+  color:#111;
+  font-weight:800;
+  margin-top:-2px;
+}
+.rc-t6 .rch .badge{
+  display:inline-block;
+  margin-top:10px;
+  background:#0044cc;
+  color:white;
+  padding:7px 32px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:0.8px;
+  text-transform:uppercase;
+}
+.rc-t6 .rc-info-sec{
+  border-bottom:none;
+  padding:4px 20px 10px;
+}
+.rc-t6 .rc-info-item{
+  width:calc(50% - 10px);
+  gap:4px;
+}
+.rc-t6 .rc-info-item .lbl{
+  color:#111;
+  font-weight:700;
+}
+.rc-t6 .rc-info-item .val{
+  flex:1;
+  min-width:0;
+  border-bottom:1.5px solid #111;
+}
+.rc-t6 .rc-tbl-wrap{
+  padding-top:8px;
+}
+.rc-t6 .tbl-hdr th{
+  background:#2f2f2f;
+  color:white;
+  border:1px solid #000;
+}
+.rc-t6 .tbl-body td{
+  border:1px solid #111;
+}
+.rc-t6 .obs-box{
+  border:1.5px solid #111;
+  border-radius:2px;
+}
+.rc-t6 .obs-box-title{
+  text-decoration:none;
+  font-weight:800;
+}
+.rc-t6 .pbar{
+  border:2px solid #0044cc;
+  background:#f6f9ff;
+}
+.rc-t6 .pbar-txt{
+  color:#00339a;
+}
+.rc-t6 .footer-sec{
+  padding-top:6px;
+}
+.rc-t6 .rem-line{
+  border-bottom:1.5px solid #111;
+}
+.rc-t6 .sig-line{
+  border-top:2px solid #111;
+}
+
+/* T7 Crimson Ledger */
+.rc-t7{
+  background:#fffdf8;
+  border:1px solid #e6d7c5;
+  font-family:'Manrope',sans-serif;
+  position:relative;
+}
+.rc-t7::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:70px;
+  background:linear-gradient(180deg,#7a1e2a,#b3394d);
+}
+.rc-t7 .rch{
+  margin-left:70px;
+  background:#fff;
+  border-bottom:3px solid #7a1e2a;
+  padding:18px 22px 16px;
+}
+.rc-t7 .rch .sn{font-family:'Cinzel',serif;font-size:28px;color:#7a1e2a;letter-spacing:1px}
+.rc-t7 .rch .st{font-size:11px;color:#8d5f67;font-weight:700;letter-spacing:2px}
+.rc-t7 .rch .badge{display:inline-block;margin-top:7px;background:#7a1e2a;color:#fff;padding:5px 16px;border-radius:3px;font-size:11px;letter-spacing:1px}
+.rc-t7 .rc-info-sec,.rc-t7 .rc-tbl-wrap,.rc-t7 .pbar-row,.rc-t7 .footer-sec{margin-left:70px}
+.rc-t7 .tbl-hdr th{background:#7a1e2a;color:#fff;border:1px solid #6a1522}
+.rc-t7 .tbl-body td{border:1px solid #eddcd0}
+.rc-t7 .tbl-body tr:nth-child(even) td{background:#fff6ee}
+.rc-t7 .pbar{background:#fff4eb;border:1.5px solid #b3394d}
+.rc-t7 .pbar-txt{color:#7a1e2a}
+
+/* T8 Slate Ribbon */
+.rc-t8{
+  background:#f7f8fa;
+  border:10px solid #2b2f3a;
+  font-family:'Montserrat',sans-serif;
+}
+.rc-t8 .rch{
+  background:linear-gradient(120deg,#2b2f3a 0%,#4f596f 100%);
+  color:#fff;
+  padding:26px 24px 20px;
+  position:relative;
+}
+.rc-t8 .rch::after{
+  content:'';
+  position:absolute;
+  right:24px;
+  top:24px;
+  width:90px;
+  height:90px;
+  border:1px solid rgba(255,255,255,0.25);
+  transform:rotate(45deg);
+}
+.rc-t8 .rch .sn{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:2px}
+.rc-t8 .rch .st{font-size:11px;letter-spacing:3px;opacity:0.78}
+.rc-t8 .rch .badge{display:inline-block;margin-top:9px;background:#f6c85f;color:#2b2f3a;padding:5px 18px;border-radius:999px;font-size:11px;font-weight:800}
+.rc-t8 .rc-info-sec{background:#fff}
+.rc-t8 .tbl-hdr th{background:#4f596f;color:#fff;border:1px solid #40485a}
+.rc-t8 .tbl-body td{border:1px solid #d5d9e2}
+.rc-t8 .tbl-body tr:nth-child(odd) td{background:#f4f6fb}
+.rc-t8 .pbar{background:#fff;border:1.5px solid #4f596f}
+.rc-t8 .pbar-txt{color:#2b2f3a}
+
+/* T9 Aurora Arc */
+.rc-t9{
+  background:#ffffff;
+  border:1px solid #ddd9f5;
+  font-family:'Raleway',sans-serif;
+  overflow:hidden;
+}
+.rc-t9 .rch{
+  background:linear-gradient(135deg,#1f3f93,#6e48aa,#9f6ad7);
+  color:#fff;
+  padding:26px 20px 48px;
+  text-align:center;
+  position:relative;
+}
+.rc-t9 .rch::after{
+  content:'';
+  position:absolute;
+  left:-10%;
+  right:-10%;
+  bottom:-36px;
+  height:70px;
+  background:#fff;
+  border-radius:50% 50% 0 0;
+}
+.rc-t9 .rch .sn{font-size:32px;font-weight:800}
+.rc-t9 .rch .st{font-size:11px;letter-spacing:2px;opacity:0.86}
+.rc-t9 .rch .badge{display:inline-block;margin-top:9px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.35);padding:5px 18px;border-radius:20px;font-size:11px}
+.rc-t9 .rc-info-sec{padding-top:22px}
+.rc-t9 .tbl-hdr th{background:linear-gradient(90deg,#1f3f93,#6e48aa);color:#fff;border:none}
+.rc-t9 .tbl-body td{border:1px solid #e8e3fb}
+.rc-t9 .tbl-body tr:nth-child(even) td{background:#faf8ff}
+.rc-t9 .pbar{background:#f3f0ff;border:1.5px solid #6e48aa}
+.rc-t9 .pbar-txt{color:#4f3a8f}
+
+/* T10 Blueprint Mono */
+.rc-t10{
+  background:#f9fcff;
+  border:2px solid #205493;
+  font-family:'DM Mono',monospace;
+}
+.rc-t10 .rch{
+  background:#205493;
+  color:#fff;
+  padding:16px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+}
+.rc-t10 .rch .sn{font-size:24px;line-height:1.05}
+.rc-t10 .rch .st{font-size:10px;opacity:0.82}
+.rc-t10 .rch .badge{background:#fff;color:#205493;padding:4px 10px;border-radius:2px;font-size:10px;font-weight:700}
+.rc-t10 .rc-info-sec,.rc-t10 .rc-tbl-wrap,.rc-t10 .pbar-row,.rc-t10 .footer-sec{border-top:1px dashed #9cbde3}
+.rc-t10 .tbl-hdr th{background:#dceaf9;color:#205493;border:1px solid #9cbde3}
+.rc-t10 .tbl-body td{border:1px solid #c9def4}
+.rc-t10 .tbl-body tr:nth-child(even) td{background:#eff6ff}
+.rc-t10 .pbar{background:#e6f1ff;border:1.5px solid #205493}
+.rc-t10 .pbar-txt{color:#205493}
+.rc-t10 .rc-info-item .val,.rc-t10 .rem-line{border-bottom-style:dashed}
+
+/* T11 Festival Stripe */
+.rc-t11{
+  background:#fff;
+  border:1px solid #f6d3cb;
+  font-family:'Nunito',sans-serif;
+  position:relative;
+}
+.rc-t11 .rch{
+  background:
+    linear-gradient(120deg,#ff6a3d 0%,#ff6a3d 50%,#ff9f43 50%,#ff9f43 100%);
+  color:#fff;
+  padding:20px;
+}
+.rc-t11 .rch .sn{font-size:30px;font-weight:800;line-height:1}
+.rc-t11 .rch .st{font-size:11px;letter-spacing:2px;margin-top:5px}
+.rc-t11 .rch .badge{display:inline-block;margin-top:9px;background:#fff;color:#ff6a3d;padding:4px 14px;border-radius:3px;font-weight:800;font-size:11px}
+.rc-t11 .tbl-hdr th{background:#ff6a3d;color:#fff;border:1px solid #eb5830}
+.rc-t11 .tbl-body td{border:1px solid #ffe2d8}
+.rc-t11 .tbl-body tr:nth-child(even) td{background:#fff7f4}
+.rc-t11 .pbar{background:#fff4ef;border:1.5px solid #ff6a3d}
+.rc-t11 .pbar-txt{color:#d94b25}
+
+/* T12 Editorial Serif */
+.rc-t12{
+  background:#faf7f0;
+  border:1px solid #d1c8b5;
+  font-family:'Cormorant Garamond',serif;
+}
+.rc-t12 .rch{
+  background:#faf7f0;
+  border-bottom:3px double #3b2f2f;
+  text-align:center;
+  padding:20px;
+}
+.rc-t12 .rch .sn{font-size:36px;color:#2f2323;letter-spacing:1px}
+.rc-t12 .rch .st{font-size:13px;color:#6f5b5b;letter-spacing:2px}
+.rc-t12 .rch .badge{display:inline-block;margin-top:8px;border:1px solid #3b2f2f;color:#3b2f2f;padding:4px 12px;font-size:11px;letter-spacing:1px}
+.rc-t12 .rc-info-sec,.rc-t12 .rc-tbl-wrap,.rc-t12 .pbar-row,.rc-t12 .footer-sec{font-family:'Merriweather',serif}
+.rc-t12 .tbl-hdr th{background:#3b2f2f;color:#faf7f0;border:1px solid #312525}
+.rc-t12 .tbl-body td{border:1px solid #d9cfbf}
+.rc-t12 .tbl-body tr:nth-child(even) td{background:#f3efe5}
+.rc-t12 .pbar{background:#f3efe5;border:1.5px solid #3b2f2f}
+.rc-t12 .pbar-txt{color:#3b2f2f}
+
+/* T13 Midnight Neon */
+.rc-t13{
+  background:#111427;
+  border:1px solid #2b3258;
+  color:#f1f4ff;
+  font-family:'Manrope',sans-serif;
+}
+.rc-t13 .rch{
+  background:linear-gradient(135deg,#1b2252,#2f2b78,#193f7a);
+  padding:22px;
+  position:relative;
+}
+.rc-t13 .rch .sn{font-size:31px;font-weight:800;color:#7ef7e7}
+.rc-t13 .rch .st{font-size:11px;letter-spacing:2px;color:#b8c6ff}
+.rc-t13 .rch .badge{display:inline-block;margin-top:8px;background:rgba(126,247,231,0.15);border:1px solid rgba(126,247,231,0.45);color:#7ef7e7;padding:5px 16px;border-radius:18px;font-size:11px}
+.rc-t13 .rc-info-sec{border-color:#2b3258}
+.rc-t13 .rc-info-item .lbl,.rc-t13 .lbl2{color:#9eabda}
+.rc-t13 .rc-info-item .val,.rc-t13 .rem-line{color:#f1f4ff;border-color:#4f5f9c}
+.rc-t13 .tbl-hdr th{background:#28306a;color:#7ef7e7;border:1px solid #37408f}
+.rc-t13 .tbl-body td{border:1px solid #313969;background:#161c36;color:#eef2ff}
+.rc-t13 .tbl-body tr:nth-child(even) td{background:#121833}
+.rc-t13 .pbar{background:#141a34;border:1.5px solid #7ef7e7}
+.rc-t13 .pbar-txt{color:#7ef7e7}
+.rc-t13 .footer-sec{color:#cfd8ff}
+.rc-t13 .sig-line{border-color:#4f5f9c}
+
+/* T14 Soft Bloom */
+.rc-t14{
+  background:#fff;
+  border:1px solid #ead8df;
+  font-family:'Poppins',sans-serif;
+  overflow:hidden;
+}
+.rc-t14 .rch{
+  background:linear-gradient(135deg,#f7c7d5,#f3a5bc,#ee93af);
+  color:#542738;
+  padding:20px 22px;
+  text-align:left;
+}
+.rc-t14 .rch .sn{font-family:'Abril Fatface',serif;font-size:30px;letter-spacing:1px}
+.rc-t14 .rch .st{font-size:11px;font-weight:600;letter-spacing:2px}
+.rc-t14 .rch .badge{display:inline-block;margin-top:10px;background:#542738;color:#fff;padding:4px 14px;border-radius:14px;font-size:11px}
+.rc-t14 .rc-info-sec{background:#fff9fb}
+.rc-t14 .tbl-hdr th{background:#d46d8a;color:#fff;border:1px solid #c95f7d}
+.rc-t14 .tbl-body td{border:1px solid #f3d8e1}
+.rc-t14 .tbl-body tr:nth-child(even) td{background:#fff5f8}
+.rc-t14 .pbar{background:#fff1f6;border:1.5px solid #d46d8a}
+.rc-t14 .pbar-txt{color:#8b3652}
+.rc-t14 .rc-photo-box{border-color:#e6bccc;background:#fff}
+
+/* T15 Regal Crest */
+.rc-t15{
+  background:#fffdf9;
+  border:8px solid #5d4428;
+  font-family:'Cinzel',serif;
+}
+.rc-t15 .rch{
+  background:linear-gradient(135deg,#5d4428,#7a5a35);
+  color:#f7e3b5;
+  text-align:center;
+  padding:20px;
+}
+.rc-t15 .rch .sn{font-size:30px;letter-spacing:2px}
+.rc-t15 .rch .st{font-size:11px;letter-spacing:3px;color:#f0d8a0}
+.rc-t15 .rch .badge{display:inline-block;margin-top:8px;background:#f7e3b5;color:#5d4428;padding:5px 16px;font-size:11px;border-radius:2px}
+.rc-t15 .rc-info-sec,.rc-t15 .rc-tbl-wrap,.rc-t15 .pbar-row,.rc-t15 .footer-sec{font-family:'Montserrat',sans-serif}
+.rc-t15 .tbl-hdr th{background:#7a5a35;color:#fff;border:1px solid #5d4428}
+.rc-t15 .tbl-body td{border:1px solid #e7d8c7}
+.rc-t15 .tbl-body tr:nth-child(even) td{background:#fcf6ee}
+.rc-t15 .pbar{background:#fbf2e7;border:1.5px solid #7a5a35}
+.rc-t15 .pbar-txt{color:#5d4428}
+
+/* T16 Data Grid */
+.rc-t16{
+  background:#ffffff;
+  border:1px solid #cad3e3;
+  font-family:'Manrope',sans-serif;
+}
+.rc-t16 .rch{
+  background:
+    linear-gradient(90deg,#10355f 0%,#10355f 48%,#1a4b80 48%,#1a4b80 100%);
+  color:#fff;
+  padding:18px 20px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  align-items:center;
+}
+.rc-t16 .rch .sn{font-size:27px;font-weight:800}
+.rc-t16 .rch .st{font-size:11px;letter-spacing:2px;color:#b6d3f1}
+.rc-t16 .rch .badge{padding:6px 12px;background:#f7b733;color:#1f2b3a;border-radius:4px;font-size:11px;font-weight:800}
+.rc-t16 .rc-info-sec{background:#f8fbff}
+.rc-t16 .rc-info-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rc-t16 .tbl-hdr th{background:#1a4b80;color:#fff;border:1px solid #11365b}
+.rc-t16 .tbl-body td{border:1px solid #d6e0ee}
+.rc-t16 .tbl-body tr:nth-child(even) td{background:#f4f8ff}
+.rc-t16 .pbar{background:#ecf4ff;border:1.5px solid #1a4b80}
+.rc-t16 .pbar-txt{color:#10355f}
+
+/* Common RC elements */
+.rc-info-sec{padding:15px 20px;border-bottom:1px solid #eee;font-family:'Poppins',sans-serif}
+.rc-student-wrap{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.rc-student-main{flex:1}
+.rc-photo-box{width:86px;height:106px;border:1.5px solid #cfd8e8;border-radius:7px;overflow:hidden;background:#f7f9fc;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#7b8798;text-align:center;padding:4px;line-height:1.35;flex-shrink:0}
+.rc-photo-box img{width:100%;height:100%;object-fit:cover}
+.rc-info-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:7px}
+.rc-info-item{display:flex;align-items:baseline;gap:6px;font-size:12px}
+.rc-info-item .lbl{font-weight:700;color:#444}
+.rc-info-item .val{border-bottom:1.5px solid #bbb;min-width:110px;padding:0 4px;font-size:12px;color:#222}
+.rc-tbl-wrap{padding:14px 20px}
+.rc-tbl{width:100%;border-collapse:collapse;font-size:12px;font-family:'Poppins',sans-serif}
+.rc-tbl th{padding:9px 10px;text-align:center;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+.rc-tbl td{padding:7px 10px;text-align:center}
+.rc-tbl .sname{text-align:left;font-weight:600}
+.rc-tbl .snum{text-align:left;color:#888}
+.obs-td{vertical-align:top;padding:8px!important;min-width:180px}
+.obs-box{border:1px solid #ddd;border-radius:8px;padding:10px;font-family:'Poppins',sans-serif;font-size:11px}
+.obs-box-title{font-weight:700;font-size:12px;text-decoration:underline;margin-bottom:6px;text-align:center}
+.obs-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f5f5f5}
+.pbar-row{padding:14px 20px}
+.pbar{border-radius:8px;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;font-family:'Poppins',sans-serif}
+.pbar-txt{font-size:13px;font-weight:700;display:flex;gap:32px}
+.footer-sec{padding:12px 20px;font-family:'Poppins',sans-serif}
+.lbl2{font-size:12px;font-weight:700;color:#444;margin-bottom:4px}
+.rem-line{border-bottom:1.5px solid #ccc;padding:3px 0;margin-bottom:5px;font-size:13px;color:#333;min-height:22px}
+.sigs-row{display:flex;justify-content:space-between;margin-top:20px;padding-top:14px;border-top:1px solid #e0e0e0}
+.sig-block{text-align:center;font-size:11px;color:#666}
+.sig-line{border-top:1.5px solid #999;width:140px;margin:8px auto 4px}
+
+/* ======= STUDENT CARD ======= */
+.sc-pair{display:flex;flex-direction:column;gap:20px;align-items:center}
+.sc-face-label{font-size:11px;font-weight:700;color:#777;text-align:center;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.sc-wrap{position:relative}
+/* Card size: 85.6 × 54mm at 96dpi ≈ 323 × 204px, scale up 1.05x */
+.sc{width:340px;height:214px;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 6px 28px rgba(0,0,0,0.22)}
+
+/* CARD T1 */
+.sc-1f{background:linear-gradient(135deg,#0f3460 60%,#1e56a0);color:white;height:100%;padding:14px;display:flex;flex-direction:column;position:relative}
+.sc-1b{background:linear-gradient(135deg,#0f3460,#16213e);color:white;height:100%;padding:14px;display:flex;flex-direction:column;position:relative}
+/* CARD T2 */
+.sc-2f{background:white;height:100%;position:relative;overflow:hidden}
+.sc-2f .top{background:linear-gradient(90deg,#00b894,#00cec9);height:68px;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.sc-2f .body{display:flex;gap:12px;padding:10px 14px}
+.sc-2b{background:#f0fdf8;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px;border-top:4px solid #00b894}
+/* CARD T3 */
+.sc-3f{background:linear-gradient(160deg,#1a1a2e,#2d1b69);color:white;height:100%;overflow:hidden;position:relative}
+.sc-3f .top{background:linear-gradient(90deg,#f5a623,#f7c948);padding:8px 14px;display:flex;align-items:center;gap:8px}
+.sc-3f .body{display:flex;gap:12px;padding:10px 14px}
+.sc-3b{background:linear-gradient(160deg,#1a1a2e,#2d1b69);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+/* CARD T4 */
+.sc-4f{background:white;height:100%;position:relative;overflow:hidden}
+.sc-4f::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#e74c3c,#c0392b,#e74c3c)}
+.sc-4f .body{display:flex;gap:12px;padding:14px 14px 10px}
+.sc-4b{background:#fff5f5;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px;border-left:4px solid #e74c3c}
+/* CARD T5 */
+.sc-5f{background:linear-gradient(135deg,#74b9ff,#0984e3);color:white;height:100%;padding:13px;position:relative}
+.sc-5b{background:linear-gradient(135deg,#0984e3,#2d3436);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+/* CARD T6 */
+.sc-6f{background:#111;color:white;height:100%;padding:13px;position:relative;overflow:hidden}
+.sc-6f::after{content:'';position:absolute;bottom:-25px;right:-25px;width:110px;height:110px;background:radial-gradient(circle,rgba(255,215,0,0.12),transparent);border-radius:50%}
+.sc-6b{background:#111;color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+/* CARD T7 */
+.sc-7f{background:linear-gradient(145deg,#8e44ad,#3498db);color:white;height:100%;overflow:hidden;position:relative}
+.sc-7f .top{background:rgba(0,0,0,0.28);padding:8px 14px;display:flex;gap:8px;align-items:center}
+.sc-7f .body{display:flex;gap:12px;padding:10px 14px}
+.sc-7b{background:linear-gradient(145deg,#2c3e50,#8e44ad);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+/* CARD T8 */
+.sc-8f{background:white;height:100%;overflow:hidden;position:relative}
+.sc-8f .wave{background:linear-gradient(90deg,#11998e,#38ef7d);height:68px;display:flex;align-items:center;padding:0 14px;gap:10px;position:relative}
+.sc-8f .wave::after{content:'';position:absolute;bottom:-15px;left:0;right:0;height:30px;background:white;clip-path:ellipse(55% 100% at 50% 100%)}
+.sc-8f .body{display:flex;gap:12px;padding:20px 14px 10px}
+.sc-8b{background:#f0fdf8;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px;border-top:4px solid #11998e}
+/* CARD T9 */
+.sc-9f{background:#fff8f0;height:100%;position:relative;overflow:hidden}
+.sc-9f::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;background:linear-gradient(135deg,#f39c12,#e74c3c);border-radius:50%;opacity:0.9}
+.sc-9f .body{display:flex;gap:12px;padding:14px;position:relative;z-index:1}
+.sc-9b{background:#fff8f0;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px;border-top:4px solid #f39c12}
+/* CARD T10 */
+.sc-10f{background:white;height:100%;border:2px solid #2d3436;overflow:hidden;position:relative}
+.sc-10f .accent{height:6px;background:#2d3436}
+.sc-10f .body{display:flex;gap:12px;padding:10px 14px}
+.sc-10b{background:white;height:100%;border:2px solid #2d3436;padding:14px;display:flex;flex-direction:column;gap:7px}
+.sc-10b .accent{height:5px;background:#2d3436;margin:-14px -14px 8px}
+
+/* Common card sub-elements */
+.c-school{font-size:12px;font-weight:700;font-family:'Oswald',sans-serif;letter-spacing:1px}
+.c-sub{font-size:9px;opacity:0.72;margin-top:1px}
+.c-photo{flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;font-family:'Poppins',sans-serif}
+.c-name{font-size:15px;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:3px;margin-bottom:5px}
+.c-name-dark{font-size:15px;font-weight:700;color:#2d3436;border-bottom:2px solid currentColor;padding-bottom:3px;margin-bottom:5px}
+.c-row{font-size:9px;margin-bottom:3px;display:flex;gap:4px}
+.c-lbl{opacity:0.68;flex-shrink:0}
+.c-val{font-weight:600}
+.c-badge{position:absolute;top:11px;right:11px;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;border:1px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.18);color:white}
+.mag{height:34px;border-radius:3px;background:#2d2d2d;flex-shrink:0}
+.c-exp-row{display:flex;justify-content:space-between;font-size:10px}
+.c-exp-lbl{font-size:9px;opacity:0.65;margin-bottom:1px}
+.c-sig-line{border-top:1px solid rgba(255,255,255,0.35);width:100px;padding-top:3px;font-size:8px;text-align:center}
+.c-sig-dark{border-top:1px solid #999;width:100px;padding-top:3px;font-size:8px;text-align:center;color:#666}
+.hologram{width:28px;height:28px;background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);border-radius:50%;opacity:0.75;position:absolute;bottom:10px;left:12px}
+.chip{width:28px;height:20px;background:linear-gradient(135deg,#c8a400,#ffd700,#c8a400);border-radius:4px;position:absolute;top:85px;left:12px;display:grid;grid-template-columns:1fr 1fr;gap:1px;padding:2px}
+.chip-l{background:rgba(0,0,0,0.2);border-radius:1px}
+
+/* SETTINGS MODAL */
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal{background:white;border-radius:16px;padding:26px;width:460px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 64px rgba(0,0,0,0.3)}
+.modal h2{font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.close-x{background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1;padding:0}
+.close-x:hover{color:#333}
+.s-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f5f5f5;gap:12px}
+.s-lbl{font-size:13px;font-weight:600;color:#333}
+.s-desc{font-size:11px;color:#aaa;margin-top:1px}
+.toggle{width:42px;height:24px;background:#e0e0e0;border-radius:12px;position:relative;cursor:pointer;border:none;transition:background 0.2s;flex-shrink:0}
+.toggle.on{background:#0f3460}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle.on::after{transform:translateX(18px)}
+.grade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.grade-item{display:flex;align-items:center;gap:5px;font-size:11px}
+.grade-item span{color:#888;flex-shrink:0;width:36px}
+.grade-item input{flex:1;padding:5px 6px;border:1.5px solid #e5e5e5;border-radius:5px;font-size:11px;font-family:'Poppins',sans-serif;outline:none;width:100%}
+
+.modal{border:1px solid rgba(15,52,96,0.08)}
+
+/* ===== ENHANCED APP UI ===== */
+:root{
+  --surface:#ffffff;
+  --surface-soft:#f7f9fc;
+  --text-strong:#182033;
+  --text-soft:#5c6780;
+  --line:#dfe6f1;
+  --brand:#0f3460;
+  --accent:#e94560;
+  --warm:#f5a623;
+}
+body{
+  color:var(--text-strong);
+  background:
+    radial-gradient(circle at 8% 10%,rgba(233,69,96,0.11),transparent 32%),
+    radial-gradient(circle at 92% 90%,rgba(15,52,96,0.14),transparent 40%),
+    linear-gradient(160deg,#edf2f9 0%,#f8fbff 55%,#eef3fb 100%);
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:linear-gradient(rgba(15,52,96,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(15,52,96,0.03) 1px,transparent 1px);
+  background-size:22px 22px;
+  opacity:0.38;
+  z-index:-1;
+}
+.app-header{
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(10px);
+}
+.app-logo{
+  box-shadow:0 10px 28px rgba(233,69,96,0.28);
+}
+.app-title{
+  letter-spacing:1.4px;
+}
+.app-subtitle{
+  opacity:0.72;
+  letter-spacing:0.45px;
+}
+.hbtn{
+  border-radius:10px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.14);
+}
+.hbtn:hover{
+  transform:translateY(-1px);
+}
+.tab-bar{
+  background:rgba(255,255,255,0.94);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid #d6deea;
+}
+.tab-btn{
+  color:#687590;
+  letter-spacing:0.15px;
+  position:relative;
+}
+.tab-btn.active{
+  color:var(--brand);
+}
+.tab-btn.active::after{
+  content:'';
+  position:absolute;
+  left:16px;
+  right:16px;
+  bottom:-3px;
+  height:3px;
+  border-radius:3px;
+  background:linear-gradient(90deg,#e94560,#f5a623);
+}
+.main-area{
+  display:grid;
+  grid-template-columns:minmax(300px,360px) 1fr;
+  height:auto;
+  min-height:calc(100vh - 119px);
+  gap:0;
+}
+.sidebar{
+  width:100%;
+  padding:20px;
+  border-right:1px solid var(--line);
+  background:linear-gradient(180deg,#ffffff,#f9fbff);
+}
+.preview-area{
+  padding:30px 22px 34px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(255,255,255,0.8) 0%,rgba(241,246,255,0.35) 44%,transparent 72%),
+    linear-gradient(170deg,#dfe7f4 0%,#d3dfef 100%);
+}
+.sec-title{
+  color:#7b879f;
+  border-bottom:1px solid #edf2fa;
+}
+.fg label{
+  color:#4e5b74;
+}
+.fg input,.fg select,.fg textarea,
+.subj-table input,.obs-item input,
+.grade-item input{
+  border:1.5px solid #d8e1ee;
+  background:#fff;
+  box-shadow:0 1px 0 rgba(255,255,255,0.6) inset;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus,
+.subj-table input:focus,.obs-item input:focus,
+.grade-item input:focus{
+  border-color:#2e5daa;
+  box-shadow:0 0 0 3px rgba(46,93,170,0.13);
+}
+.tmpl-btn{
+  border-color:#d7e0ed;
+}
+.tmpl-btn.active{
+  background:#fff6f8;
+}
+.add-btn{
+  background:#f2f6ff;
+  border-color:#b8cce8;
+}
+.add-btn:hover{
+  transform:translateY(-1px);
+}
+.print-label{
+  color:#5f6f8e;
+  letter-spacing:1.1px;
+}
+.print-wrapper{
+  border-radius:14px;
+  border:1px solid rgba(15,52,96,0.1);
+  box-shadow:0 18px 46px rgba(19,38,69,0.22);
+}
+.modal-bg{
+  backdrop-filter:blur(2px);
+}
+.modal{
+  width:min(460px,94vw);
+}
+.rc{
+  width:min(700px,100%);
+}
+.sc{
+  width:min(340px,100%);
+}
+#printContent{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+@keyframes uiEnter{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.app-header,.tab-bar,.sidebar,.preview-area{
+  animation:uiEnter .38s ease both;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1100px){
+  .main-area{grid-template-columns:minmax(280px,330px) 1fr}
+  .sidebar{padding:16px}
+  .preview-area{padding:20px 14px 24px}
+  .rc-info-row{gap:10px}
+  .pbar-txt{gap:15px;font-size:12px;flex-wrap:wrap}
+}
+@media (max-width: 900px){
+  .app-header{
+    flex-wrap:wrap;
+    padding:12px 14px;
+    gap:10px;
+  }
+  .header-actions{
+    width:100%;
+    justify-content:flex-end;
+    margin-left:0;
+  }
+  .hbtn{
+    padding:7px 11px;
+    font-size:11px;
+  }
+  .tab-bar{
+    position:sticky;
+    top:70px;
+    z-index:95;
+    padding:0 10px;
+  }
+  .tab-btn{
+    flex:1;
+    padding:12px 10px;
+    font-size:12px;
+  }
+  .main-area{
+    grid-template-columns:1fr;
+    min-height:auto;
+  }
+  .sidebar{
+    border-right:none;
+    border-bottom:1px solid #d8e1ef;
+    max-height:none;
+  }
+  .preview-area{
+    padding:18px 10px 24px;
+  }
+  .rc{
+    min-height:auto;
+  }
+  .rc-student-wrap{
+    flex-direction:column-reverse;
+    align-items:flex-start;
+  }
+  .rc-photo-box{
+    width:94px;
+    height:114px;
+  }
+  .rc-info-item .val{
+    min-width:82px;
+  }
+}
+@media (max-width: 620px){
+  .app-title{font-size:17px}
+  .app-subtitle{font-size:9px}
+  .app-logo{width:40px;height:40px;font-size:16px}
+  .header-actions{
+    justify-content:space-between;
+    gap:6px;
+  }
+  .hbtn{
+    flex:1;
+    justify-content:center;
+    min-width:0;
+  }
+  .sidebar{
+    padding:14px 11px 15px;
+  }
+  .tmpl-grid{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .subj-table{
+    font-size:10px;
+  }
+  .subj-table th{
+    font-size:9px;
+    padding:6px 4px;
+  }
+  .subj-table td{
+    padding:3px 2px;
+  }
+  .obs-grid{
+    grid-template-columns:1fr;
+  }
+  .rc-info-sec,.rc-tbl-wrap,.pbar-row,.footer-sec{
+    padding-left:12px;
+    padding-right:12px;
+  }
+  .rc-t7::before{
+    width:0;
+  }
+  .rc-t7 .rch,
+  .rc-t7 .rc-info-sec,
+  .rc-t7 .rc-tbl-wrap,
+  .rc-t7 .pbar-row,
+  .rc-t7 .footer-sec{
+    margin-left:0;
+  }
+  .rc-t16 .rc-info-row{
+    grid-template-columns:1fr;
+  }
+  .rc-tbl{
+    font-size:10px;
+  }
+  .rc-tbl th{
+    font-size:9px;
+    padding:7px 4px;
+    letter-spacing:0.2px;
+  }
+  .rc-tbl td{
+    padding:6px 4px;
+  }
+  .obs-td{
+    min-width:138px;
+  }
+  .pbar{
+    padding:9px 10px;
+  }
+  .pbar-txt{
+    font-size:11px;
+    gap:8px;
+  }
+  .sigs-row{
+    gap:8px;
+  }
+  .sig-line{
+    width:110px;
+  }
+  .sc{
+    border-radius:10px;
+  }
+  .modal{
+    padding:16px;
+  }
+}
+@media print{
+  body{background:white!important}
+  body::before{display:none}
+  .print-wrapper{
+    box-shadow:none!important;
+    border:none!important;
+  }
+}
+
+/* ===== LANDSCAPE CARDS (11-20) ===== */
+/* Landscape card: 214px tall × 340px wide (rotated credit card ratio) */
+.sc-ls{width:340px;height:214px;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 6px 28px rgba(0,0,0,0.22)}
+
+/* T11 Coral Sunset */
+.sc-11f{background:linear-gradient(160deg,#ff6b6b 0%,#feca57 100%);color:white;height:100%;padding:14px;position:relative}
+.sc-11f .ls-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.sc-11f .ls-school{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px}
+.sc-11f .ls-body{display:flex;gap:12px;align-items:center}
+.sc-11f .ls-photo{width:60px;height:74px;border-radius:8px;background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.6);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;overflow:hidden}
+.sc-11b{background:linear-gradient(160deg,#ff6b6b,#ee5a24);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+
+/* T12 Deep Space */
+.sc-12f{background:radial-gradient(ellipse at 30% 50%,#1a1040 0%,#040412 100%);color:white;height:100%;padding:14px;position:relative;overflow:hidden}
+.sc-12f::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.6) 1px,transparent 1px);background-size:24px 24px;opacity:0.2}
+.sc-12f .ls-hdr{position:relative;z-index:1;display:flex;justify-content:space-between;margin-bottom:10px}
+.sc-12f .ls-school{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:#a29bfe}
+.sc-12f .ls-body{position:relative;z-index:1;display:flex;gap:12px;align-items:center}
+.sc-12f .ls-photo{width:60px;height:74px;border-radius:50%;background:rgba(108,92,231,0.3);border:2px solid #a29bfe;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;overflow:hidden}
+.sc-12b{background:radial-gradient(ellipse at 70% 50%,#1a1040,#040412);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+
+/* T13 Forest Pine */
+.sc-13f{background:white;height:100%;position:relative;overflow:hidden}
+.sc-13f .ls-stripe{position:absolute;top:0;left:0;bottom:0;width:90px;background:linear-gradient(180deg,#1b5e20,#2e7d32)}
+.sc-13f .ls-content{position:absolute;left:90px;right:0;top:0;bottom:0;padding:12px}
+.sc-13f .ls-photo{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:60px;height:74px;border-radius:6px;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,0.8);text-align:center;overflow:hidden}
+.sc-13b{background:#f1f8e9;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px;border-left:5px solid #2e7d32}
+
+/* T14 Pastel Pink */
+.sc-14f{background:linear-gradient(135deg,#ffeaa7 0%,#fd79a8 100%);color:#2d3436;height:100%;padding:14px;position:relative;overflow:hidden}
+.sc-14f::after{content:'';position:absolute;bottom:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,0.3);border-radius:50%}
+.sc-14f .ls-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sc-14f .ls-school{font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:#6c2d5e}
+.sc-14f .ls-body{display:flex;gap:12px;align-items:center;position:relative;z-index:1}
+.sc-14f .ls-photo{width:60px;height:74px;border-radius:50% 50% 50% 50% / 40% 40% 60% 60%;background:rgba(255,255,255,0.5);border:2px solid rgba(108,45,94,0.4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;overflow:hidden}
+.sc-14b{background:linear-gradient(135deg,#ffeaa7,#fab1d3);height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+
+/* T15 Chrome Dark */
+.sc-15f{background:linear-gradient(135deg,#2c3e50 0%,#34495e 60%,#2c3e50 100%);color:white;height:100%;padding:14px;position:relative;overflow:hidden}
+.sc-15f::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#e74c3c,#e67e22,#f1c40f,#2ecc71,#3498db,#9b59b6)}
+.sc-15f .ls-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sc-15f .ls-school{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;color:#ecf0f1}
+.sc-15f .ls-body{display:flex;gap:12px;align-items:center}
+.sc-15f .ls-photo{width:60px;height:74px;border-radius:4px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;overflow:hidden}
+.sc-15b{background:linear-gradient(135deg,#2c3e50,#1a252f);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+
+/* T16 Indigo Wave */
+.sc-16f{background:white;height:100%;overflow:hidden;position:relative}
+.sc-16f .wave-bg{position:absolute;bottom:0;left:0;right:0;height:55%;background:linear-gradient(135deg,#4834d4,#686de0);clip-path:ellipse(70% 100% at 50% 100%)}
+.sc-16f .ls-top{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.sc-16f .ls-school{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;color:#4834d4}
+.sc-16f .ls-body{display:flex;gap:12px;align-items:center;padding:4px 14px;position:relative;z-index:1}
+.sc-16f .ls-photo{width:60px;height:74px;border-radius:6px;background:#eef0fc;border:2px solid #686de0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#4834d4;text-align:center;overflow:hidden}
+.sc-16b{background:linear-gradient(135deg,#4834d4,#30336b);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+
+/* T17 Sunrise Gold */
+.sc-17f{background:white;height:100%;position:relative;overflow:hidden}
+.sc-17f .gold-hdr{background:linear-gradient(90deg,#f5a623,#f7c948,#f5a623);height:50px;padding:0 14px;display:flex;align-items:center;justify-content:space-between}
+.sc-17f .ls-school{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#1a1a2e}
+.sc-17f .ls-body{display:flex;gap:12px;padding:10px 14px;align-items:center}
+.sc-17f .ls-photo{width:60px;height:74px;border-radius:6px;background:#fffbf0;border:2px solid #f5a623;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#b7841a;text-align:center;overflow:hidden}
+.sc-17b{background:linear-gradient(135deg,#1a1a2e,#2c2c4a);color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+
+/* T18 Marble White */
+.sc-18f{background:white;height:100%;position:relative;overflow:hidden}
+.sc-18f::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 30%,rgba(0,0,0,0.03) 50%,transparent 70%),repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(180,160,140,0.06) 10px,rgba(180,160,140,0.06) 11px);pointer-events:none}
+.sc-18f .ls-top{border-bottom:2px solid #c8bfb5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.sc-18f .ls-school{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;color:#3e3028}
+.sc-18f .ls-body{display:flex;gap:12px;padding:10px 14px;align-items:center}
+.sc-18f .ls-photo{width:60px;height:74px;border-radius:4px;background:#f7f4f0;border:1px solid #c8bfb5;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#7a6c5d;text-align:center;overflow:hidden}
+.sc-18b{background:#f7f4f0;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px;border:2px solid #c8bfb5}
+
+/* T19 Neon Cyber */
+.sc-19f{background:#0d0d1a;color:white;height:100%;padding:14px;position:relative;overflow:hidden}
+.sc-19f::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,179,0.04) 3px,rgba(0,255,179,0.04) 4px)}
+.sc-19f .ls-hdr{display:flex;justify-content:space-between;margin-bottom:10px;position:relative;z-index:1}
+.sc-19f .ls-school{font-family:'DM Mono',monospace;font-size:11px;color:#00ffb3;letter-spacing:1px}
+.sc-19f .ls-body{display:flex;gap:12px;align-items:center;position:relative;z-index:1}
+.sc-19f .ls-photo{width:60px;height:74px;border-radius:4px;background:rgba(0,255,179,0.08);border:1px solid #00ffb3;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#00ffb3;text-align:center;overflow:hidden}
+.sc-19b{background:#0d0d1a;color:white;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px}
+
+/* T20 Classic Brown */
+.sc-20f{background:#fffdf7;height:100%;position:relative;overflow:hidden;border:3px solid #8b5e3c}
+.sc-20f .ls-top{background:linear-gradient(135deg,#8b5e3c,#a0722a);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.sc-20f .ls-school{font-family:'Merriweather',serif;font-size:11px;font-weight:700;color:#f7e3b5;letter-spacing:1px}
+.sc-20f .ls-body{display:flex;gap:12px;padding:10px 14px;align-items:center}
+.sc-20f .ls-photo{width:60px;height:74px;border-radius:4px;background:#f7f0e8;border:2px solid #8b5e3c;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#8b5e3c;text-align:center;overflow:hidden}
+.sc-20b{background:#f7f0e8;height:100%;padding:14px;display:flex;flex-direction:column;gap:7px;border:3px solid #8b5e3c}
+
+.hidden{display:none!important}
+/* Dark Mode */
+body.dark{background:#0d1117;color:#e6edf3}
+body.dark .app-header{background:linear-gradient(135deg,#1a1a2e,#0d1117)}
+body.dark .sidebar{background:#161b22;border-color:#30363d}
+body.dark .sec-title{color:#8b949e;border-color:#30363d}
+body.dark .fg label{color:#8b949e}
+body.dark .fg input,.body.dark .fg select,.body.dark .fg textarea,.body.dark .subj-table input,.body.dark .obs-item input{background:#21262d;border-color:#30363d;color:#e6edf3}
+body.dark .preview-area{background:#0d1117}
+body.dark .tab-bar{background:#161b22;border-color:#30363d}
+body.dark .tab-btn{color:#8b949e}
+body.dark .tab-btn.active{color:#e94560}
+body.dark .print-label{color:#8b949e}
+body.dark .tmpl-btn{background:#21262d;border-color:#30363d;color:#8b949e}
+body.dark .tmpl-btn.active{background:#2d1f2d;border-color:#e94560;color:#e94560}
+body.dark .add-btn{background:#21262d;border-color:#30363d;color:#8b949e}
+body.dark .modal{background:#161b22}
+body.dark .modal h2{color:#e6edf3}
+body.dark .s-row{border-color:#30363d}
+body.dark .s-lbl{color:#e6edf3}
+
+
+/* ===== SMOOTH TEMPLATE TRANSITION ===== */
+#printContent { transition: opacity 0.15s ease; }
+#printContent.fading { opacity: 0; pointer-events: none; }
+@keyframes previewIn {
+  from { opacity:0; transform:translateY(8px) scale(0.99); }
+  to   { opacity:1; transform:translateY(0)   scale(1);    }
+}
+#printContent.preview-enter > * {
+  animation: previewIn 0.26s cubic-bezier(.22,.68,0,1.15) both;
+}
+
+
+/* ===== FAV STARS ON TEMPLATE BUTTONS ===== */
+.tmpl-btn { position: relative; padding-right: 16px !important; overflow: hidden; }
+.fv-star {
+  position: absolute; top: 3px; right: 2px;
+  background: none; border: none; font-size: 10px; line-height: 1;
+  cursor: pointer; color: #ccc; padding: 0; z-index: 3;
+  transition: color 0.15s, transform 0.15s;
+}
+.fv-star:hover { color: #f5a623; transform: scale(1.3); }
+.fv-star.on    { color: #f5a623; }
+.fv-badge {
+  position: absolute; bottom: 2px; left: 2px;
+  background: #f5a623; color: #1a1a2e;
+  font-size: 7px; font-weight: 800; padding: 1px 4px;
+  border-radius: 3px; letter-spacing: 0.3px; pointer-events: none;
+}
+
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-logo" id="logoEl">FOS</div>
+  <div>
+    <div class="app-title" id="headerSchoolEl">Future of Student – by Hussain</div>
+    <div class="app-subtitle">Report Card & Student ID Card Generator</div>
+  </div>
+  <div class="header-actions">
+    <a href="index.html" class="hbtn hbtn-home">🏠 Home</a>
+    <button class="hbtn hbtn-settings" onclick="toggleDark()" title="Dark Mode">🌙</button>
+    <button class="hbtn hbtn-settings" onclick="openSettings()">⚙ Settings</button>
+    <button class="hbtn hbtn-download" onclick="downloadImage()" title="Download Image">📥</button>
+    <button class="hbtn hbtn-print" onclick="doPrint()">🖨 Print</button>
+    <button class="hbtn hbtn-pwa" id="btnInstall" onclick="installApp()" title="Install App on Device" style="display:none">📲 Install App</button>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabRc" onclick="switchTab('rc')">📋 Report Card</button>
+  <button class="tab-btn" id="tabSc" onclick="switchTab('sc')">🪪 Student ID Card</button>
+</div>
+
+<div class="main-area">
+
+  <!-- ===== RC SIDEBAR ===== -->
+  <div class="sidebar" id="sideRc">
+    <div class="sec-title">Template (16 Unique Report Card Designs)</div>
+    <div class="tmpl-grid">
+      <button class="tmpl-btn active" onclick="setRcT(1,this)">Classic Navy</button>
+      <button class="tmpl-btn" onclick="setRcT(2,this)">Modern Orange</button>
+      <button class="tmpl-btn" onclick="setRcT(3,this)">Forest Green</button>
+      <button class="tmpl-btn" onclick="setRcT(4,this)">Dark Elite</button>
+      <button class="tmpl-btn" onclick="setRcT(5,this)">Gradient Pro</button>
+      <button class="tmpl-btn" onclick="setRcT(6,this)">Royal Blue</button>
+      <button class="tmpl-btn" onclick="setRcT(7,this)">Crimson Ledger</button>
+      <button class="tmpl-btn" onclick="setRcT(8,this)">Slate Ribbon</button>
+      <button class="tmpl-btn" onclick="setRcT(9,this)">Aurora Arc</button>
+      <button class="tmpl-btn" onclick="setRcT(10,this)">Blueprint Mono</button>
+      <button class="tmpl-btn" onclick="setRcT(11,this)">Festival Stripe</button>
+      <button class="tmpl-btn" onclick="setRcT(12,this)">Editorial Serif</button>
+      <button class="tmpl-btn" onclick="setRcT(13,this)">Midnight Neon</button>
+      <button class="tmpl-btn" onclick="setRcT(14,this)">Soft Bloom</button>
+      <button class="tmpl-btn" onclick="setRcT(15,this)">Regal Crest</button>
+      <button class="tmpl-btn" onclick="setRcT(16,this)">Data Grid</button>
+    </div>
+
+    <div class="sec-title">School Info</div>
+    <div class="fg"><label>School Name</label><input id="rSch" value="Future School" oninput="rp()"></div>
+    <div class="fg"><label>Tagline / Sub-title</label><input id="rTag" value="& ACADEMIC SYSTEM" oninput="rp()"></div>
+
+    <div class="sec-title">Student Info</div>
+    <div class="fg"><label>Roll No.</label><input id="rRoll" value="001" oninput="rp()"></div>
+    <div class="fg"><label>Student Full Name</label><input id="rName" value="Muhammad Ali Khan" oninput="rp()"></div>
+    <div class="fg"><label>Father / Guardian Name (S/o, D/o)</label><input id="rFather" value="Haji Abdul Rehman Khan" oninput="rp()"></div>
+    <div class="row2">
+      <div class="fg"><label>Class</label><input id="rClass" value="5th" oninput="rp()"></div>
+      <div class="fg"><label>Year</label><input id="rYear" value="2025" oninput="rp()"></div>
+    </div>
+    
+    <div class="fg"><label>Examination</label><input id="rExam" value="Annual Examination" oninput="rp()"></div>
+
+    <div class="sec-title">Subjects & Marks</div>
+    <table class="subj-table">
+      <thead><tr><th>Subject</th><th>Full</th><th>Obt.</th><th></th></tr></thead>
+      <tbody id="subjBody"></tbody>
+    </table>
+    <button class="add-btn" onclick="addSubj()">+ Add Subject</button>
+
+    <div class="sec-title">Observations</div>
+    <div class="obs-grid">
+      <div class="obs-item"><label>A: Attendance</label><input id="oAtt" value="A+" oninput="rp()"></div>
+      <div class="obs-item"><label>B: Home Work</label><input id="oHW" value="A" oninput="rp()"></div>
+      <div class="obs-item"><label>C: Hand Writing</label><input id="oHWr" value="B+" oninput="rp()"></div>
+      <div class="obs-item"><label>A: Uniform</label><input id="oUni" value="A" oninput="rp()"></div>
+      <div class="obs-item"><label>B: Hair/Nail</label><input id="oHN" value="A" oninput="rp()"></div>
+      <div class="obs-item"><label>C: Shoes</label><input id="oSh" value="A" oninput="rp()"></div>
+    </div>
+
+    <div class="sec-title">Remarks & Grade</div>
+    <div class="fg"><label>General Remarks</label><textarea id="rRem" oninput="rp()">Excellent performance. Keep it up! The student has shown remarkable dedication and discipline throughout the academic year.</textarea></div>
+    <div class="fg"><label>Final Grade (leave blank for auto)</label><input id="rGrade" value="" placeholder="Auto calculated" oninput="rp()"></div>
+  </div>
+
+  <!-- ===== SC SIDEBAR ===== -->
+  <div class="sidebar hidden" id="sideSc">
+    <div class="sec-title">Portrait Cards (1–10)</div>
+    <div class="tmpl-grid">
+      <button class="tmpl-btn active" onclick="setScT(1,this)">1. Classic Blue</button>
+      <button class="tmpl-btn" onclick="setScT(2,this)">2. Fresh Green</button>
+      <button class="tmpl-btn" onclick="setScT(3,this)">3. Royal Gold</button>
+      <button class="tmpl-btn" onclick="setScT(4,this)">4. Bold Red</button>
+      <button class="tmpl-btn" onclick="setScT(5,this)">5. Sky Blue</button>
+      <button class="tmpl-btn" onclick="setScT(6,this)">6. Black Prem.</button>
+      <button class="tmpl-btn" onclick="setScT(7,this)">7. Purple Grad.</button>
+      <button class="tmpl-btn" onclick="setScT(8,this)">8. Teal Wave</button>
+      <button class="tmpl-btn" onclick="setScT(9,this)">9. Orange Geo.</button>
+      <button class="tmpl-btn" onclick="setScT(10,this)">10. Minimalist</button>
+    </div>
+    <div class="sec-title">Landscape Cards (11–20)</div>
+    <div class="tmpl-grid">
+      <button class="tmpl-btn" onclick="setScT(11,this)">11. Coral Sunset</button>
+      <button class="tmpl-btn" onclick="setScT(12,this)">12. Deep Space</button>
+      <button class="tmpl-btn" onclick="setScT(13,this)">13. Forest Pine</button>
+      <button class="tmpl-btn" onclick="setScT(14,this)">14. Pastel Pink</button>
+      <button class="tmpl-btn" onclick="setScT(15,this)">15. Chrome Dark</button>
+      <button class="tmpl-btn" onclick="setScT(16,this)">16. Indigo Wave</button>
+      <button class="tmpl-btn" onclick="setScT(17,this)">17. Sunrise Gold</button>
+      <button class="tmpl-btn" onclick="setScT(18,this)">18. Marble White</button>
+      <button class="tmpl-btn" onclick="setScT(19,this)">19. Neon Cyber</button>
+      <button class="tmpl-btn" onclick="setScT(20,this)">20. Classic Brown</button>
+    </div>
+
+    <div class="sec-title">School Info</div>
+    <div class="fg"><label>School Name</label><input id="sSchool" value="Future School" oninput="sp()"></div>
+    <div class="fg"><label>School Logo</label><input type="file" id="schLogo" accept="image/*" onchange="handleSchoolLogo(this)"></div>
+
+    <div class="sec-title">Student Info</div>
+    <div class="fg"><label>Roll No.</label><input id="sRoll" value="001" oninput="sp()"></div>
+    <div class="fg"><label>Student Full Name</label><input id="sName" value="Muhammad Ali Khan" oninput="sp()"></div>
+    <div class="fg"><label>Father Name</label><input id="sFather" value="Haji Abdul Rehman" oninput="sp()"></div>
+    <div class="row2">
+      <div class="fg"><label>Blood Group</label>
+        <select id="sBlood" onchange="sp()"><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>O+</option><option>O-</option><option>AB+</option><option>AB-</option></select>
+      </div>
+      <div class="fg"><label>Class (Text)</label><input id="sClass" value="5th" oninput="sp()"></div>
+    </div>
+    <div class="row2">
+      <div class="fg"><label>Date of Birth</label><input type="date" id="sDob" value="2014-03-15" onchange="sp()"></div>
+      <div class="fg"><label>Class No. (for expiry)</label><input type="number" id="sClNum" value="5" min="1" max="12" oninput="sp()"></div>
+    </div>
+    <div class="fg"><label>Student Photo</label><input type="file" id="sPhoto" accept="image/*" onchange="handlePhotoUpload(this,'sc')"></div>
+    <div class="info-box">ℹ Class 9 or above → <strong>2 year expiry</strong><br>Below class 9 → <strong>1 year expiry</strong> (auto calculated)</div>
+    <div class="fg"><label>Date of Issue</label><input type="date" id="sIssue" onchange="sp()"></div>
+  </div>
+
+  <!-- ===== PREVIEW ===== -->
+  <div class="preview-area" id="prevArea">
+    <div id="printContent"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg hidden" id="modalBg">
+  <div class="modal">
+    <h2>⚙ App Settings <button class="close-x" onclick="closeSettings()">×</button></h2>
+
+    <div class="s-row">
+      <div><div class="s-lbl">School Logo Initials</div><div class="s-desc">2–3 letters shown in header logo</div></div>
+      <input type="text" id="sLogo" value="FOS" maxlength="3" style="width:54px;padding:6px;border:1.5px solid #ddd;border-radius:6px;font-weight:700;text-align:center;font-family:Poppins,sans-serif;font-size:14px" oninput="applySettings()">
+    </div>
+    <div class="s-row">
+      <div><div class="s-lbl">App Header School Name</div><div class="s-desc">Shown in top header bar</div></div>
+      <input type="text" id="sHdrName" value="Future of Student – by Hussain" style="width:160px;padding:6px;border:1.5px solid #ddd;border-radius:6px;font-family:Poppins,sans-serif;font-size:12px" oninput="applySettings()">
+    </div>
+    <div class="s-row">
+      <div><div class="s-lbl">Auto Percentage & Grade</div><div class="s-desc">Calculate from obtained/total marks</div></div>
+      <button class="toggle on" id="tAuto" onclick="tog('tAuto','autoGrade')"></button>
+    </div>
+    <div class="s-row">
+      <div><div class="s-lbl">Show Observations</div><div class="s-desc">Discipline & Cleanliness section</div></div>
+      <button class="toggle on" id="tObs" onclick="tog('tObs','showObs')"></button>
+    </div>
+    <div class="s-row">
+      <div><div class="s-lbl">Show Grand Total Row</div><div class="s-desc">Total row at bottom of subjects table</div></div>
+      <button class="toggle on" id="tGT" onclick="tog('tGT','showGT')"></button>
+    </div>
+    <div class="s-row">
+      <div><div class="s-lbl">Hologram Sticker on Card</div><div class="s-desc">Decorative hologram circle</div></div>
+      <button class="toggle on" id="tHolo" onclick="tog('tHolo','showHolo')"></button>
+    </div>
+    <div class="s-row">
+      <div><div class="s-lbl">Smart Chip on Card</div><div class="s-desc">Chip design element on front</div></div>
+      <button class="toggle on" id="tChip" onclick="tog('tChip','showChip')"></button>
+    </div>
+
+    <div style="margin-top:14px">
+      <div class="s-lbl" style="margin-bottom:6px">Custom Grade Scale</div>
+      <div class="grade-grid">
+        <div class="grade-item"><span>90%+</span><input id="g90" value="A+" oninput="rp()"></div>
+        <div class="grade-item"><span>80%+</span><input id="g80" value="A" oninput="rp()"></div>
+        <div class="grade-item"><span>70%+</span><input id="g70" value="B+" oninput="rp()"></div>
+        <div class="grade-item"><span>60%+</span><input id="g60" value="B" oninput="rp()"></div>
+        <div class="grade-item"><span>50%+</span><input id="g50" value="C" oninput="rp()"></div>
+        <div class="grade-item"><span>Below</span><input id="g0" value="F" oninput="rp()"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let curTab = 'rc', rcT = 1, scT = 1;
+let subjs = [
+  {n:'Islamiyat',f:100,o:92},{n:'Urdu',f:100,o:88},{n:'English',f:100,o:95},
+  {n:'Mathematics',f:100,o:90},{n:'Social Studies',f:100,o:85},{n:'Science',f:100,o:91},
+  {n:'Computer',f:50,o:47},{n:'Drawing',f:50,o:44}
+];
+let cfg = {autoGrade:true,showObs:true,showGT:true,showHolo:true,showChip:true};
+let rcPhotoData = '', scPhotoData = '';
+
+// ===== TABS =====
+function switchTab(t) {
+  curTab = t;
+  document.getElementById('tabRc').classList.toggle('active', t==='rc');
+  document.getElementById('tabSc').classList.toggle('active', t==='sc');
+  document.getElementById('sideRc').classList.toggle('hidden', t!=='rc');
+  document.getElementById('sideSc').classList.toggle('hidden', t!=='sc');
+  t==='rc' ? rp() : sp();
+}
+function setRcT(n,btn){rcT=n;document.querySelectorAll('#sideRc .tmpl-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rp();}
+function setScT(n,btn){scT=n;document.querySelectorAll('#sideSc .tmpl-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');sp();}
+
+// ===== SUBJECTS =====
+function renderSubjs() {
+  document.getElementById('subjBody').innerHTML = subjs.map((s,i)=>`
+    <tr>
+      <td><input value="${s.n}" onchange="subjs[${i}].n=this.value;rp()"></td>
+      <td><input type="number" value="${s.f}" style="width:44px" onchange="subjs[${i}].f=+this.value;rp()"></td>
+      <td><input type="number" value="${s.o}" style="width:50px" onchange="subjs[${i}].o=+this.value;rp()"></td>
+      <td><button class="rm-btn" onclick="subjs.splice(${i},1);renderSubjs();rp()">✕</button></td>
+    </tr>`).join('');
+}
+function addSubj(){subjs.push({n:'New Subject',f:100,o:0});renderSubjs();rp();}
+
+// ===== HELPERS =====
+const v=id=>{const e=document.getElementById(id);return e?e.value:'';}
+function calcGrade(p){
+  if(p>=90)return v('g90')||'A+';if(p>=80)return v('g80')||'A';
+  if(p>=70)return v('g70')||'B+';if(p>=60)return v('g60')||'B';
+  if(p>=50)return v('g50')||'C';return v('g0')||'F';
+}
+function fmtDate(ds){if(!ds)return '—';return new Date(ds).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function expiryDate(issue,clNum){
+  if(!issue)return 'N/A';
+  const d=new Date(issue);d.setFullYear(d.getFullYear()+(clNum>=9?2:1));
+  return d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+function logoLetters(nm){return nm.split(' ').map(w=>w[0]).filter(Boolean).slice(0,2).join('');}
+let schoolLogoData = '';
+function getSchoolLogoHTML(){ return schoolLogoData ? `<img src="${schoolLogoData}" style="width:50px;height:50px;object-fit:contain;margin-right:10px">` : ''; }
+function handleSchoolLogo(input){
+  const file = input.files && input.files[0];
+  if(!file){ schoolLogoData = ''; rp(); sp(); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    schoolLogoData = e.target.result || '';
+    localStorage.setItem('schoolLogo', schoolLogoData);
+    rp(); sp();
+  };
+  reader.readAsDataURL(file);
+}
+(function(){
+  const saved = localStorage.getItem('schoolLogo');
+  if(saved) schoolLogoData = saved;
+})();
+function handlePhotoUpload(input, mode){
+  const file = input.files && input.files[0];
+  if(!file){
+    if(mode==='rc') rcPhotoData = '';
+    else scPhotoData = '';
+    mode==='rc' ? rp() : sp();
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const imgData = (e && e.target && e.target.result) ? e.target.result : '';
+    if(mode==='rc') rcPhotoData = imgData;
+    else scPhotoData = imgData;
+    mode==='rc' ? rp() : sp();
+  };
+  reader.readAsDataURL(file);
+}
+
+
+// ===== ANIMATED PREVIEW RENDER =====
+function setPreview(html) {
+  const pc = document.getElementById('printContent');
+  if (!pc) return;
+  pc.classList.add('fading');
+  setTimeout(() => {
+    pc.innerHTML = html;
+    pc.classList.remove('fading');
+    pc.classList.remove('preview-enter');
+    void pc.offsetWidth; // force reflow
+    pc.classList.add('preview-enter');
+  }, 80);
+}
+// ===== REPORT CARD RENDER =====
+function rp() {
+  let tf=0,to=0;
+  subjs.forEach(s=>{tf+=s.f;to+=s.o;});
+  const pct = tf>0?Math.round((to/tf)*100):0;
+  const grade = v('rGrade')||calcGrade(pct);
+  const sch=v('rSch'), tag=v('rTag'), sname=v('rName'), father=v('rFather'), cls=v('rClass'), yr=v('rYear'), exam=v('rExam'), rem=v('rRem');
+  const rcPhoto = '';
+
+  // Headers per template
+  const schLogo = getSchoolLogoHTML();
+  const hdrs = {
+    1:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">ACADEMIC MARK SHEET</div></div></div>`,
+    2:`<div class="rch"><div class="logo">${schLogo?'':logoLetters(sch)}</div><div style="display:flex;align-items:center;gap:10px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">ACADEMIC MARK SHEET</div></div></div></div>`,
+    3:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">ACADEMIC MARK SHEET</div></div></div>`,
+    4:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">ACADEMIC MARK SHEET</div></div></div>`,
+    5:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">ACADEMIC MARK SHEET</div></div></div>`,
+    6:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Academic Mark Sheet</div></div></div>`,
+    7:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Academic Progress Report</div></div></div>`,
+    8:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Term Evaluation Sheet</div></div></div>`,
+    9:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Scholastic Record</div></div></div>`,
+    10:`<div class="rch" style="display:flex;align-items:center;gap:10px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div></div></div><div class="badge">Result Register</div></div>`,
+    11:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Student Achievement Card</div></div></div>`,
+    12:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Academic Chronicle</div></div></div>`,
+    13:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Merit Analytics</div></div></div>`,
+    14:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Progress Bouquet</div></div></div>`,
+    15:`<div class="rch" style="display:flex;align-items:center;justify-content:center;gap:12px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div><div class="badge">Crown Merit Sheet</div></div></div>`,
+    16:`<div class="rch" style="display:flex;align-items:center;gap:10px">${schLogo}<div><div class="sn">${sch}</div><div class="st">${tag}</div></div></div><div class="badge">Performance Matrix</div></div>`
+  };
+
+  const obsHTML = cfg.showObs ? `<td class="obs-td" rowspan="${subjs.length+1}">
+    <div class="obs-box">
+      <div class="obs-box-title">Discipline</div>
+      <div class="obs-row"><span>A: Attendance</span><span>${v('oAtt')}</span></div>
+      <div class="obs-row"><span>B: Home Work</span><span>${v('oHW')}</span></div>
+      <div class="obs-row"><span>C: Hand Writing</span><span>${v('oHWr')}</span></div>
+      <div class="obs-box-title" style="margin-top:8px">Cleanliness</div>
+      <div class="obs-row"><span>A: Uniform</span><span>${v('oUni')}</span></div>
+      <div class="obs-row"><span>B: Hair/Nail</span><span>${v('oHN')}</span></div>
+      <div class="obs-row"><span>C: Shoes</span><span>${v('oSh')}</span></div>
+    </div></td>` : '';
+
+  const subjRows = subjs.map((s,i)=>`<tr class="tbl-body"><td class="snum">${i+1}-</td><td class="sname">${s.n}</td><td>${s.f}</td><td>${s.o}</td>${i===0?obsHTML:''}</tr>`).join('');
+  const gtRow = cfg.showGT ? `<tr class="tbl-body"><td colspan="2" style="font-weight:700;text-align:center;background:rgba(0,0,0,0.04)">GRAND TOTAL:</td><td style="font-weight:700">${tf}</td><td style="font-weight:700">${to}</td></tr>` : '';
+
+  const html = `<div class="rc rc-t${rcT}">
+    ${hdrs[rcT]}
+    <div class="rc-info-sec">
+      <div class="rc-student-wrap">
+        <div class="rc-student-main">
+          <div class="rc-info-row"><div class="rc-info-item"><span class="lbl">Name:</span><span class="val">${sname}</span></div><div class="rc-info-item"><span class="lbl">S/o, D/o:</span><span class="val">${father}</span></div></div>
+          <div class="rc-info-row"><div class="rc-info-item"><span class="lbl">Class:</span><span class="val">${cls}</span></div><div class="rc-info-item"><span class="lbl">Examination:</span><span class="val">${exam}</span></div><div class="rc-info-item"><span class="lbl">Year:</span><span class="val">${yr}</span></div></div>
+        </div>
+        
+      </div>
+    </div>
+    <div class="rc-tbl-wrap">
+      <table class="rc-tbl">
+        <thead class="tbl-hdr"><tr><th>Sr.#</th><th style="text-align:left">Subjects</th><th>Full Marks</th><th>Obtained</th>${cfg.showObs?'<th>Observation</th>':''}</tr></thead>
+        <tbody>${subjRows}${gtRow}</tbody>
+      </table>
+    </div>
+    <div class="pbar-row"><div class="pbar"><div class="pbar-txt">
+      <span>PERCENTAGE: ${pct}%</span><span>GRADE: ${grade}</span><span>POSITION: _______</span>
+    </div></div></div>
+    <div class="footer-sec">
+      <div><div class="lbl2">Final Grade:</div><div class="rem-line">${grade}</div></div>
+      <div style="margin-top:10px"><div class="lbl2">General Remarks:</div><div class="rem-line">${rem}</div></div>
+      <div class="sigs-row">
+        <div class="sig-block"><div class="sig-line"></div>Teacher's Signature</div>
+        <div class="sig-block"><div class="sig-line"></div>Principal Signature</div>
+      </div>
+      <div style="margin-top:12px;text-align:center"><div id="rcQrContainer"></div><div style="font-size:8px;color:#888;margin-top:2px">Scan QR to Verify Student</div></div>
+    </div>
+  </div>`;
+  
+  const rRoll = v('rRoll') || v('sRoll') || '001';
+  const rcQrUrl = `${window.location.origin}/view.html?id=${rRoll}`;
+  
+  setPreview(`<div class="print-label">REPORT CARD PREVIEW</div><div class="print-wrapper">${html}</div>`);
+  setTimeout(() => {
+    const rRoll = window.v('rRoll') || window.v('sRoll') || '001';
+    window.generateCardQR('rcQrContainer', `${window.location.origin}/view.html?id=${rRoll}`);
+  }, 100);
+}
+
+// ===== STUDENT CARD RENDER =====
+function sp() {
+  const nm=v('sName'),fn=v('sFather'),bl=v('sBlood'),cl=v('sClass'),dob=v('sDob');
+  const clNum=parseInt(v('sClNum'))||5, issue=v('sIssue')||new Date().toISOString().split('T')[0], sch=v('sSchool');
+  const roll=v('sRoll')||'';
+  const expiry=expiryDate(issue,clNum), issued=fmtDate(issue), dobFmt=fmtDate(dob);
+  const holo=cfg.showHolo?'<div class="hologram"></div>':'';
+  const qrUrl = `${window.location.origin}/view.html?id=${roll}`;
+  const qrCodeHTML = `<div style="margin-top:8px;text-align:center"><div id="qrCanvas"></div><div style="font-size:7px;margin-top:2px">SCAN TO VERIFY</div></div>`;
+  const chip=cfg.showChip?'<div class="chip"><div class="chip-l"></div><div class="chip-l"></div><div class="chip-l"></div><div class="chip-l"></div></div>':'';
+  const schLogo = schoolLogoData ? `<img src="${schoolLogoData}" style="width:35px;height:35px;object-fit:contain;border-radius:4px">` : '';
+  const photoInner=(placeholder='Photo Here',txtColor='inherit')=> scPhotoData
+    ? `<img src="${scPhotoData}" alt="Student photo" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`
+    : `<span style="color:${txtColor};font-size:9px;line-height:1.25">${placeholder}</span>`;
+
+  const photoW=(cls,sz,clr='rgba(255,255,255,0.15)',brd='rgba(255,255,255,0.4)',rad='6px')=>
+    `<div class="c-photo" style="width:${sz}px;height:${sz+15}px;background:${clr};border:2px solid ${brd};border-radius:${rad};flex-shrink:0;overflow:hidden">${photoInner('Photo<br>Here',brd)}</div>`;
+  
+  const infoRows=(textColor='white')=>`
+    <div class="c-row"><span class="c-lbl" style="color:${textColor==='white'?'rgba(255,255,255,0.68)':'#888'}">Father:</span><span class="c-val" style="color:${textColor}">${fn}</span></div>
+    <div class="c-row"><span class="c-lbl" style="color:${textColor==='white'?'rgba(255,255,255,0.68)':'#888'}">Blood:</span><span class="c-val" style="color:${textColor}">${bl}</span></div>
+    <div class="c-row"><span class="c-lbl" style="color:${textColor==='white'?'rgba(255,255,255,0.68)':'#888'}">Class:</span><span class="c-val" style="color:${textColor}">${cl}</span></div>
+    <div class="c-row"><span class="c-lbl" style="color:${textColor==='white'?'rgba(255,255,255,0.68)':'#888'}">DOB:</span><span class="c-val" style="color:${textColor}">${dobFmt}</span></div>`;
+
+  const backExp=(textColor='white',lblColor='rgba(255,255,255,0.65)',sigEl='<div class="c-sig-line">Head of School</div>')=>`
+    <div class="mag"></div>
+    <div class="c-exp-row">
+      <div><div class="c-exp-lbl" style="color:${lblColor}">Date of Issue</div><div style="font-size:10px;font-weight:600;color:${textColor}">${issued}</div></div>
+      <div><div class="c-exp-lbl" style="color:${lblColor}">Expiry Date</div><div style="font-size:10px;font-weight:600;color:${textColor}">${expiry}</div></div>
+    </div>
+    <div style="margin-top:auto">${sigEl}</div>
+    <div style="margin-top:6px;text-align:center"><div id="scQrBack"></div><div style="font-size:6px;color:${lblColor}">Scan to Verify</div></div>`;
+
+  let front='', back='';
+  const t=scT;
+
+  if(t===1){
+    front=`<div class="sc-1f"><div class="c-badge">STUDENT ID</div>
+      <div style="display:flex;align-items:center;gap:9px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:8px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">${schLogo}<div><div class="c-school">${sch}</div><div class="c-sub">Student Identity Card</div></div></div>
+      <div style="display:flex;gap:11px;flex:1">${photoW('',62)}
+        <div class="info"><div class="c-name">${nm}</div>${infoRows()}
+          <div class="c-sig-line" style="margin-top:6px">Student Signature</div></div></div>${holo}</div>`;
+    back=`<div class="sc-1b">${backExp()}${chip}</div>`;
+  } else if(t===2){
+    front=`<div class="sc-2f"><div class="top">
+        <div><div class="c-school" style="color:white">${sch}</div><div class="c-sub" style="color:rgba(255,255,255,0.8)">Academic Excellence</div></div></div>
+      <div class="body">${photoW('',60,'#e8f8f5','#00b894')}
+        <div><div class="c-name-dark" style="border-color:#00b894;font-family:Nunito,sans-serif">${nm}</div>
+          <div class="c-row" style="color:#636e72"><span>Father:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${fn}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Blood:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${bl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Class:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${cl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>DOB:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${dobFmt}</span></div>
+        </div></div>
+      <div style="position:absolute;bottom:9px;right:12px;background:#00b894;color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">STUDENT ID</div>${holo}</div>`;
+    back=`<div class="sc-2b">${backExp('#2d3436','#00b894','<div class="c-sig-dark">Head of School</div>')}${chip}</div>`;
+  } else if(t===3){
+    front=`<div class="sc-3f"><div class="top">
+        <div class="c-school" style="color:#1a1a2e">${sch}</div>
+        <div style="font-size:9px;color:rgba(26,26,46,0.65)">Royal Institution</div></div>
+      <div class="body">${photoW('',62,'rgba(245,166,35,0.18)','#f5a623')}
+        <div style="flex:1"><div class="c-name" style="color:#f5a623;font-family:Playfair Display,serif;border-color:rgba(245,166,35,0.35)">${nm}</div>${infoRows()}
+          <div class="c-sig-line" style="margin-top:4px">Student Signature</div></div></div>
+      <div style="position:absolute;bottom:9px;right:12px;font-size:9px;font-weight:700;color:#f5a623;font-family:Oswald,sans-serif;letter-spacing:2px">STUDENT ID</div>${holo}</div>`;
+    back=`<div class="sc-3b">${backExp()}${chip}</div>`;
+  } else if(t===4){
+    front=`<div class="sc-4f"><div class="body">
+        ${photoW('',64,'#fff5f5','#e74c3c','8px')}
+        <div style="flex:1"><div class="c-school" style="color:#e74c3c;margin-bottom:4px">${sch}</div>
+          <div style="font-size:15px;font-weight:700;color:#2d3436;border-left:3px solid #e74c3c;padding-left:8px;margin-bottom:6px">${nm}</div>
+          <div class="c-row" style="color:#636e72"><span>Father:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${fn}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Blood:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${bl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Class:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${cl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>DOB:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${dobFmt}</span></div>
+        </div></div>
+      <div style="position:absolute;bottom:9px;right:12px;background:#e74c3c;color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">STUDENT ID</div>${holo}</div>`;
+    back=`<div class="sc-4b">${backExp('#2d3436','#e74c3c','<div class="c-sig-dark">Head of School</div>')}${chip}</div>`;
+  } else if(t===5){
+    front=`<div class="sc-5f"><div style="text-align:center;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:7px;margin-bottom:9px">
+        <div style="display:flex;align-items:center;gap:8px">${schLogo}<div class="c-school">${sch}</div><div class="c-sub">Empowering Minds</div></div>
+      <div style="display:flex;gap:11px;align-items:center">
+        <div class="c-photo" style="width:66px;height:66px;border-radius:50%;background:rgba(255,255,255,0.18);border:3px solid rgba(255,255,255,0.55);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;overflow:hidden">${photoInner('Photo','rgba(255,255,255,0.85)')}</div>
+        <div style="flex:1"><div class="c-name">${nm}</div>${infoRows()}</div></div>
+      <div style="position:absolute;bottom:9px;right:12px;background:rgba(0,0,0,0.28);color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">STUDENT ID</div>${holo}</div>`;
+    back=`<div class="sc-5b">${backExp()}${chip}</div>`;
+  } else if(t===6){
+    front=`<div class="sc-6f"><div class="c-badge" style="border-color:#ffd700;color:#ffd700;background:rgba(0,0,0,0.3)">STUDENT ID</div>
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px">
+        <div><div class="c-school" style="color:#ffd700">${sch}</div><div class="c-sub">Premium Academic Institute</div></div></div>
+      <div style="display:flex;gap:11px">${photoW('',62,'rgba(255,215,0,0.1)','#ffd700','4px')}
+        <div style="flex:1"><div class="c-name" style="color:#ffd700;font-family:Playfair Display,serif;border-color:rgba(255,215,0,0.3)">${nm}</div>${infoRows()}
+          <div class="c-sig-line" style="border-color:rgba(255,215,0,0.35);margin-top:4px">Student Signature</div></div></div>${holo}</div>`;
+    back=`<div class="sc-6b">${backExp()}${chip}</div>`;
+  } else if(t===7){
+    front=`<div class="sc-7f"><div class="top">
+        <div style="display:flex;align-items:center;gap:8px">${schLogo}<div><div class="c-school">${sch}</div><div class="c-sub">Excellence in Education</div></div></div>
+      <div class="body">${photoW('',62)}
+        <div style="flex:1"><div class="c-name" style="font-family:Nunito,sans-serif;font-weight:800">${nm}</div>${infoRows()}</div></div>
+      <div class="c-badge">STUDENT ID</div>${holo}</div>`;
+    back=`<div class="sc-7b">${backExp()}${chip}</div>`;
+  } else if(t===8){
+    front=`<div class="sc-8f"><div class="wave">
+        <div><div class="c-school" style="color:white">${sch}</div><div class="c-sub" style="color:rgba(255,255,255,0.8)">Academic Institution</div></div></div>
+      <div class="body">
+        <div class="c-photo" style="width:64px;height:77px;border-radius:50%;background:#e8fdf5;border:3px solid #11998e;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#11998e;text-align:center;overflow:hidden">${photoInner('Photo','#11998e')}</div>
+        <div><div class="c-name-dark" style="border-color:#11998e;font-family:Nunito,sans-serif;font-weight:800">${nm}</div>
+          <div class="c-row"><span style="color:#888">Father:</span><span style="font-weight:700;color:#11998e;margin-left:4px">${fn}</span></div>
+          <div class="c-row"><span style="color:#888">Blood:</span><span style="font-weight:700;color:#11998e;margin-left:4px">${bl}</span></div>
+          <div class="c-row"><span style="color:#888">Class:</span><span style="font-weight:700;color:#11998e;margin-left:4px">${cl}</span></div>
+          <div class="c-row"><span style="color:#888">DOB:</span><span style="font-weight:700;color:#11998e;margin-left:4px">${dobFmt}</span></div>
+        </div></div>
+      <div style="position:absolute;bottom:9px;right:12px;background:#11998e;color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">STUDENT ID</div>${holo}</div>`;
+    back=`<div class="sc-8b">${backExp('#2d3436','#11998e','<div class="c-sig-dark">Head of School</div>')}${chip}</div>`;
+  } else if(t===9){
+    front=`<div class="sc-9f"><div class="body">
+        ${photoW('',63,'rgba(243,156,18,0.15)','#f39c12','8px')}
+        <div style="flex:1;margin-top:10px"><div class="c-school" style="color:#f39c12">${sch}</div>
+          <div style="font-size:15px;font-weight:700;color:#2d3436;border-bottom:2px solid #f39c12;padding-bottom:3px;margin-bottom:5px;margin-top:2px">${nm}</div>
+          <div class="c-row" style="color:#636e72"><span>Father:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${fn}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Blood:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${bl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Class:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${cl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>DOB:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${dobFmt}</span></div></div></div>
+      <div style="position:absolute;bottom:9px;right:12px;background:#f39c12;color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">STUDENT ID</div>${holo}</div>`;
+    back=`<div class="sc-9b">${backExp('#2d3436','#f39c12','<div class="c-sig-dark">Head of School</div>')}${chip}</div>`;
+  } else if(t===10){
+    front=`<div class="sc-10f"><div class="accent"></div><div class="body">
+        ${photoW('',64,'#f5f5f5','#ccc','4px')}
+        <div style="flex:1"><div style="font-size:11px;font-weight:700;color:#2d3436;font-family:Oswald,sans-serif;letter-spacing:2px;margin-bottom:4px">${sch}</div>
+          <div style="font-size:15px;font-weight:700;color:#2d3436;font-family:Merriweather,serif;margin-bottom:4px">${nm}</div>
+          <div class="c-row" style="color:#636e72"><span>Father:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${fn}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Blood:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${bl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>Class:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${cl}</span></div>
+          <div class="c-row" style="color:#636e72"><span>DOB:</span><span style="font-weight:700;color:#2d3436;margin-left:4px">${dobFmt}</span></div>
+        </div></div>
+      <div style="position:absolute;bottom:9px;right:12px;border:1px solid #2d3436;color:#2d3436;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700;font-family:Oswald,sans-serif;letter-spacing:1px">STUDENT ID</div></div>`;
+    back=`<div class="sc-10b"><div class="accent"></div><div class="mag" style="background:#2d3436;margin-top:8px"></div>
+      <div class="c-exp-row" style="color:#2d3436">
+        <div><div class="c-exp-lbl" style="color:#636e72">Date of Issue</div><div style="font-size:10px;font-weight:600">${issued}</div></div>
+        <div><div class="c-exp-lbl" style="color:#636e72">Expiry Date</div><div style="font-size:10px;font-weight:600">${expiry}</div></div></div>
+      <div style="margin-top:auto"><div class="c-sig-dark">Head of School</div></div>${chip}</div>`;
+  }
+
+  // ===== LANDSCAPE CARDS 11-20 =====
+  const isLandscape = t >= 11;
+  if(isLandscape){
+    const photoInner2=(clr)=>scPhotoData
+      ?`<img src="${scPhotoData}" alt="" style="width:100%;height:100%;object-fit:cover">`
+      :`<span style="color:${clr};font-size:9px;line-height:1.25">Photo<br>Here</span>`;
+    const lsInfo=(tc,lc)=>`<div style="flex:1">
+      <div style="font-size:13px;font-weight:700;color:${tc};border-bottom:1.5px solid ${lc};padding-bottom:3px;margin-bottom:5px">${nm}</div>
+      <div style="font-size:9px;color:${lc};margin-bottom:2px">Father: <strong style="color:${tc}">${fn}</strong></div>
+      <div style="display:flex;gap:10px;font-size:9px;color:${lc}"><span>Blood: <strong style="color:${tc}">${bl}</strong></span><span>Class: <strong style="color:${tc}">${cl}</strong></span></div>
+      <div style="font-size:9px;color:${lc};margin-top:2px">DOB: <strong style="color:${tc}">${dobFmt}</strong></div>
+    </div>`;
+    const lsBackHTML=(tc,lc,brd)=>`<div class="mag" style="background:${brd}"></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:${tc};margin-top:4px">
+        <div><div style="font-size:9px;color:${lc}">Date of Issue</div><div style="font-weight:600">${issued}</div></div>
+        <div><div style="font-size:9px;color:${lc}">Expiry Date</div><div style="font-weight:600">${expiry}</div></div>
+      </div><div style="margin-top:auto"><div style="border-top:1px solid ${lc};width:110px;padding-top:3px;font-size:8px;text-align:center;color:${tc}">Head of School</div></div>`;
+
+    if(t===11){
+      front=`<div class="sc-11f"><span class="c-badge">STUDENT ID</span>
+        <div class="ls-hdr"><div class="ls-school">${sch}</div><div style="font-size:9px;opacity:0.8">Excellence Card</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('white')}</div>${lsInfo('white','rgba(255,255,255,0.75)')}</div>${holo}</div>`;
+      back=`<div class="sc-11b">${lsBackHTML('white','rgba(255,255,255,0.5)','rgba(0,0,0,0.4)')}${chip}</div>`;
+    } else if(t===12){
+      front=`<div class="sc-12f"><div class="ls-hdr"><div class="ls-school">${sch}</div><div style="font-size:9px;color:#a29bfe;font-family:monospace">[ ID ]</div></div>
+        <div class="ls-body"><div class="ls-photo" style="border-radius:50%">${photoInner2('#a29bfe')}</div>${lsInfo('#f1f4ff','rgba(162,155,254,0.8)')}</div>${holo}</div>`;
+      back=`<div class="sc-12b">${lsBackHTML('white','rgba(162,155,254,0.6)','#a29bfe')}${chip}</div>`;
+    } else if(t===13){
+      front=`<div class="sc-13f">
+        <div class="ls-stripe"><div class="ls-photo">${photoInner2('rgba(255,255,255,0.8)')}</div></div>
+        <div class="ls-content"><div style="font-size:8px;font-weight:700;color:#1b5e20;letter-spacing:1px;margin-bottom:4px">STUDENT ID</div>
+          <div style="font-size:13px;font-weight:700;color:#1b5e20;border-bottom:2px solid #2e7d32;padding-bottom:3px;margin-bottom:4px">${nm}</div>
+          <div style="font-size:9px;color:#388e3c;margin-bottom:2px">Father: <strong style="color:#1b5e20">${fn}</strong></div>
+          <div style="font-size:9px;color:#388e3c">Blood: <strong style="color:#1b5e20">${bl}</strong> &nbsp; Class: <strong style="color:#1b5e20">${cl}</strong></div>
+          <div style="font-size:9px;color:#388e3c;margin-top:2px">DOB: <strong style="color:#1b5e20">${dobFmt}</strong></div>
+        </div>${holo}</div>`;
+      back=`<div class="sc-13b">${lsBackHTML('#1b5e20','#388e3c','#2e7d32')}${chip}</div>`;
+    } else if(t===14){
+      front=`<div class="sc-14f"><div class="ls-hdr"><div class="ls-school">${sch}</div><div style="font-size:9px;color:#6c2d5e;font-weight:700">ID CARD</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('#6c2d5e')}</div>${lsInfo('#2d3436','#6c2d5e')}</div>${holo}</div>`;
+      back=`<div class="sc-14b">${lsBackHTML('#2d3436','#6c2d5e','#2d3436')}${chip}</div>`;
+    } else if(t===15){
+      front=`<div class="sc-15f"><div class="ls-hdr"><div class="ls-school">${sch}</div><div style="border:1px solid rgba(255,255,255,0.4);color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600">STUDENT ID</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('rgba(255,255,255,0.5)')}</div>${lsInfo('white','rgba(255,255,255,0.65)')}</div>${holo}</div>`;
+      back=`<div class="sc-15b">${lsBackHTML('white','rgba(255,255,255,0.5)','rgba(255,255,255,0.2)')}${chip}</div>`;
+    } else if(t===16){
+      front=`<div class="sc-16f"><div class="wave-bg"></div>
+        <div class="ls-top"><div class="ls-school">${sch}</div><div style="background:#4834d4;color:white;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700">STUDENT ID</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('#4834d4')}</div>
+          <div style="flex:1;position:relative;z-index:1">
+            <div style="font-size:13px;font-weight:700;color:#2d3436;border-bottom:2px solid #4834d4;padding-bottom:3px;margin-bottom:4px">${nm}</div>
+            <div style="font-size:9px;color:#636e72">Father: <strong style="color:#2d3436">${fn}</strong></div>
+            <div style="display:flex;gap:10px;font-size:9px;color:#636e72;margin-top:2px"><span>Blood: <strong style="color:#2d3436">${bl}</strong></span><span>Class: <strong style="color:#2d3436">${cl}</strong></span></div>
+          </div></div>${holo}</div>`;
+      back=`<div class="sc-16b">${lsBackHTML('white','rgba(255,255,255,0.6)','rgba(255,255,255,0.2)')}${chip}</div>`;
+    } else if(t===17){
+      front=`<div class="sc-17f"><div class="gold-hdr"><div class="ls-school">${sch}</div><div style="background:#1a1a2e;color:#f5a623;padding:2px 8px;border-radius:4px;font-size:9px;font-weight:700">STUDENT ID</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('#b7841a')}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;font-family:Playfair Display,serif;color:#1a1a2e;border-bottom:2px solid #f5a623;padding-bottom:3px;margin-bottom:4px">${nm}</div>
+            <div style="font-size:9px;color:#636e72">Father: <strong style="color:#2d3436">${fn}</strong></div>
+            <div style="display:flex;gap:10px;font-size:9px;color:#636e72;margin-top:2px"><span>Blood: <strong style="color:#2d3436">${bl}</strong></span><span>Class: <strong style="color:#2d3436">${cl}</strong></span></div>
+            <div style="font-size:9px;color:#636e72;margin-top:2px">DOB: <strong style="color:#2d3436">${dobFmt}</strong></div>
+          </div></div>${holo}</div>`;
+      back=`<div class="sc-17b">${lsBackHTML('white','rgba(245,166,35,0.6)','#f5a623')}${chip}</div>`;
+    } else if(t===18){
+      front=`<div class="sc-18f"><div class="ls-top"><div class="ls-school">${sch}</div><div style="font-size:9px;color:#7a6c5d;font-style:italic">Identity Card</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('#7a6c5d')}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;font-family:Cormorant Garamond,serif;color:#3e3028;border-bottom:2px solid #8b5e3c;padding-bottom:3px;margin-bottom:4px">${nm}</div>
+            <div style="font-size:9px;color:#7a6c5d">Father: <strong style="color:#3e3028">${fn}</strong></div>
+            <div style="display:flex;gap:10px;font-size:9px;color:#7a6c5d;margin-top:2px"><span>Blood: <strong style="color:#3e3028">${bl}</strong></span><span>Class: <strong style="color:#3e3028">${cl}</strong></span></div>
+            <div style="border:1px solid #8b5e3c;color:#8b5e3c;padding:2px 8px;border-radius:2px;font-size:8px;font-weight:700;display:inline-block;margin-top:5px">STUDENT ID</div>
+          </div></div></div>`;
+      back=`<div class="sc-18b">${lsBackHTML('#3e3028','#7a6c5d','#8b5e3c')}${chip}</div>`;
+    } else if(t===19){
+      front=`<div class="sc-19f"><div class="ls-hdr"><div class="ls-school">${sch}</div><div style="font-family:DM Mono,monospace;font-size:9px;color:#00ffb3">[ ID ]</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('#00ffb3')}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;font-family:DM Mono,monospace;color:#00ffb3;border-bottom:1px solid rgba(0,255,179,0.4);padding-bottom:3px;margin-bottom:4px">${nm}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.6)">FATHER: <strong style="color:#00ffb3">${fn}</strong></div>
+            <div style="display:flex;gap:10px;font-size:9px;color:rgba(255,255,255,0.6);margin-top:2px"><span>BLOOD: <strong style="color:#00ffb3">${bl}</strong></span><span>CLASS: <strong style="color:#00ffb3">${cl}</strong></span></div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.6);margin-top:2px">DOB: <strong style="color:#00ffb3">${dobFmt}</strong></div>
+          </div></div>${holo}</div>`;
+      back=`<div class="sc-19b">${lsBackHTML('#00ffb3','rgba(0,255,179,0.6)','rgba(0,255,179,0.3)')}${chip}</div>`;
+    } else if(t===20){
+      front=`<div class="sc-20f"><div class="ls-top"><div class="ls-school">${sch}</div><div style="font-size:9px;color:#f7e3b5;font-style:italic">Identity Card</div></div>
+        <div class="ls-body"><div class="ls-photo">${photoInner2('#8b5e3c')}</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;font-family:Merriweather,serif;color:#3e2a1a;border-bottom:2px solid #8b5e3c;padding-bottom:3px;margin-bottom:4px">${nm}</div>
+            <div style="font-size:9px;color:#7a5c3e">Father: <strong style="color:#3e2a1a">${fn}</strong></div>
+            <div style="display:flex;gap:10px;font-size:9px;color:#7a5c3e;margin-top:2px"><span>Blood: <strong style="color:#3e2a1a">${bl}</strong></span><span>Class: <strong style="color:#3e2a1a">${cl}</strong></span></div>
+            <div style="font-size:9px;color:#7a5c3e;margin-top:2px">DOB: <strong style="color:#3e2a1a">${dobFmt}</strong></div>
+            <div style="background:#8b5e3c;color:#f7e3b5;padding:2px 8px;border-radius:2px;font-size:8px;font-weight:700;display:inline-block;margin-top:5px">STUDENT ID</div>
+          </div></div></div>`;
+      back=`<div class="sc-20b"><div class="mag" style="background:#8b5e3c;margin-top:4px"></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#3e2a1a;margin-top:4px">
+          <div><div style="font-size:9px;color:#7a5c3e">Date of Issue</div><div style="font-weight:600">${issued}</div></div>
+          <div><div style="font-size:9px;color:#7a5c3e">Expiry Date</div><div style="font-weight:600">${expiry}</div></div>
+        </div><div style="margin-top:auto"><div style="border-top:1px solid #8b5e3c;width:110px;padding-top:3px;font-size:8px;text-align:center;color:#3e2a1a">Head of School</div></div>${chip}</div>`;
+    }
+  }
+
+  const cardClass = isLandscape ? 'sc-ls' : 'sc';
+  setPreview(`
+    <div class="print-label">FRONT SIDE ${isLandscape ? '(Landscape)' : '(Portrait)'}</div>
+    <div class="print-wrapper" style="margin-bottom:16px"><div class="${cardClass}">${front}</div></div>
+    <div class="print-label">BACK SIDE ${isLandscape ? '(Landscape)' : '(Portrait)'}</div>
+    <div class="print-wrapper"><div class="${cardClass}">${back}</div></div>`);
+  
+  setTimeout(() => {
+    const r = roll || '001';
+    window.generateCardQR('scQrBack', `${window.location.origin}/view.html?id=${r}`);
+    if(roll && nm) {
+      const sd = { roll: roll, name: nm, father: fn, blood: bl, class: cl, dob: dob, school: sch, issueDate: issue, expiryDate: expiry };
+      if(window.saveStudentData) window.saveStudentData(sd);
+    }
+  }, 100);
+}
+
+// ===== PRINT =====
+function doPrint() {
+  const content = document.getElementById('printContent').innerHTML;
+  const win = window.open('', '_blank');
+  const fonts = document.querySelector('link[href*="fonts.googleapis"]').href;
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8"><title>Print</title>
+    <link href="${fonts}" rel="stylesheet">
+    <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Poppins,sans-serif;background:white;padding:16px}
+    ${document.querySelector('style').textContent}
+    @page{size:A4 portrait;margin:10mm}
+    #printRoot{display:flex;flex-direction:column;align-items:center;width:190mm;margin:0 auto}
+    @media print{
+      html,body{background:white!important;padding:0!important;margin:0!important}
+      body::before{display:none!important}
+      .print-label{display:none!important}
+      #printRoot{width:190mm!important;align-items:stretch!important}
+      .print-wrapper{width:190mm!important;max-width:190mm!important;box-shadow:none!important;border:none!important;border-radius:0!important;break-inside:avoid;page-break-inside:avoid;margin:0!important}
+      .print-wrapper .rc{width:190mm!important;max-width:190mm!important}
+      .print-wrapper + .print-wrapper{margin-top:10mm}
+    }</style>
+    </head><body><div id="printRoot">${content}</div>
+    <script>
+      (function(){
+        const PX_PER_MM = 96/25.4;
+        const MAX_W = (210 - 20) * PX_PER_MM;
+        const MAX_H = (297 - 20) * PX_PER_MM;
+
+        function fitReportCardsToA4(){
+          document.querySelectorAll('.print-wrapper .rc').forEach((card)=>{
+            card.style.transform = '';
+            card.style.transformOrigin = '';
+
+            const holder = card.parentElement;
+            if(holder){
+              holder.style.width = '';
+              holder.style.height = '';
+              holder.style.overflow = '';
+            }
+
+            const rect = card.getBoundingClientRect();
+            if(!rect.width || !rect.height) return;
+
+            const scale = Math.min(MAX_W / rect.width, MAX_H / rect.height, 1);
+            if(scale < 1 && holder){
+              card.style.transform = 'scale(' + scale + ')';
+              card.style.transformOrigin = 'top center';
+              holder.style.width = rect.width + 'px';
+              holder.style.height = (rect.height * scale) + 'px';
+              holder.style.overflow = 'hidden';
+            }
+          });
+        }
+
+        window.addEventListener('load', fitReportCardsToA4);
+        window.addEventListener('beforeprint', fitReportCardsToA4);
+        setTimeout(fitReportCardsToA4, 250);
+      })();
+    <\/script></body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(), 900);
+}
+
+// ===== SETTINGS =====
+function openSettings(){document.getElementById('modalBg').classList.remove('hidden');}
+function closeSettings(){document.getElementById('modalBg').classList.add('hidden');}
+function tog(id, key){
+  const btn=document.getElementById(id);btn.classList.toggle('on');
+  cfg[key]=btn.classList.contains('on');
+  curTab==='rc'?rp():sp();
+}
+function applySettings(){
+  document.getElementById('logoEl').textContent=v('sLogo')||'FOS';
+  document.getElementById('headerSchoolEl').textContent=v('sHdrName')||'Future of Student – by Hussain';
+}
+document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeSettings();});
+
+// ===== PWA =====
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+
+// ===== URL PARAMS =====
+const params = new URLSearchParams(location.search);
+const startTab = params.get('tab') || sessionStorage.getItem('startTab') || 'rc';
+const startTmpl = parseInt(params.get('tmpl') || sessionStorage.getItem('startTmpl')) || 1;
+sessionStorage.removeItem('startTab'); sessionStorage.removeItem('startTmpl');
+
+// Set default issue date
+document.getElementById('sIssue').value = new Date().toISOString().split('T')[0];
+
+// Init
+renderSubjs();
+loadFromLocal();
+
+// Auto-save on every input + change
+document.querySelectorAll('.sidebar input, .sidebar select, .sidebar textarea').forEach(el=>{
+  el.addEventListener('input',  saveLocalAuto);
+  el.addEventListener('change', saveLocalAuto);
+});
+
+// Restore saved templates — URL params take priority over localStorage
+const restoredRcT = startTmpl > 1 ? startTmpl : (window._savedRcT || 1);
+const restoredScT = window._savedScT || 1;
+
+if(startTab === 'sc') {
+  switchTab('sc');
+  setTimeout(()=>{
+    const btn = document.querySelectorAll('#sideSc .tmpl-btn')[restoredScT-1];
+    if(btn){setScT(restoredScT,btn);}
+    // Also activate correct RC template silently
+    const rcBtn = document.querySelectorAll('#sideRc .tmpl-btn')[restoredRcT-1];
+    if(rcBtn){rcT=restoredRcT;rcBtn.classList.add('active');document.querySelectorAll('#sideRc .tmpl-btn').forEach((b,i)=>{if(i!==restoredRcT-1)b.classList.remove('active');});}
+  },50);
+} else {
+  if(restoredRcT>1){
+    const btn = document.querySelectorAll('#sideRc .tmpl-btn')[restoredRcT-1];
+    if(btn){setRcT(restoredRcT,btn);}
+  } else {
+    rp();
+  }
+  // Also prime SC template silently
+  setTimeout(()=>{
+    const scBtn = document.querySelectorAll('#sideSc .tmpl-btn')[restoredScT-1];
+    if(scBtn){scT=restoredScT;scBtn.classList.add('active');document.querySelectorAll('#sideSc .tmpl-btn').forEach((b,i)=>{if(i!==restoredScT-1)b.classList.remove('active');});}
+  },50);
+}
+
+// Save template on every switch
+const _baseSetRcT = setRcT;
+setRcT = function(n,btn){_baseSetRcT(n,btn);saveLocalAuto();};
+const _baseSetScT = setScT;
+setScT = function(n,btn){_baseSetScT(n,btn);saveLocalAuto();};
+
+// ===== TEMPLATE FAVORITES & RECENT USED =====
+(function(){
+  const LS_FAV_RC = 'fos_fav_rc', LS_FAV_SC = 'fos_fav_sc';
+  const LS_REC_RC = 'fos_rec_rc', LS_REC_SC = 'fos_rec_sc';
+
+  function lsGet(k){ try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return [];} }
+  function lsSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+
+  function toggleFav(type, n, starEl) {
+    const k = type==='rc' ? LS_FAV_RC : LS_FAV_SC;
+    const favs = lsGet(k);
+    const idx = favs.indexOf(n);
+    if(idx > -1){ favs.splice(idx,1); starEl.classList.remove('on'); }
+    else { favs.push(n); starEl.classList.add('on'); }
+    lsSet(k, favs);
+  }
+
+  function trackRecent(type, n) {
+    const k = type==='rc' ? LS_REC_RC : LS_REC_SC;
+    let rec = lsGet(k);
+    rec = [n,...rec.filter(x=>x!==n)].slice(0,5);
+    lsSet(k, rec);
+    refreshBadges(type);
+  }
+
+  function refreshBadges(type) {
+    const sel = type==='rc' ? '#sideRc .tmpl-btn' : '#sideSc .tmpl-btn';
+    const favs = lsGet(type==='rc' ? LS_FAV_RC : LS_FAV_SC);
+    const rec  = lsGet(type==='rc' ? LS_REC_RC  : LS_REC_SC);
+    document.querySelectorAll(sel).forEach((btn, i) => {
+      const n = i + 1;
+      // star
+      let star = btn.querySelector('.fv-star');
+      if(!star){
+        star = document.createElement('button');
+        star.className = 'fv-star';
+        star.setAttribute('aria-label','Favorite');
+        star.innerHTML = '★';
+        star.onclick = e => { e.stopPropagation(); toggleFav(type, n, star); };
+        btn.appendChild(star);
+      }
+      star.classList.toggle('on', favs.includes(n));
+      // badge
+      let badge = btn.querySelector('.fv-badge');
+      if(!badge){
+        badge = document.createElement('span');
+        badge.className = 'fv-badge';
+        btn.appendChild(badge);
+      }
+      const ridx = rec.indexOf(n);
+      badge.textContent = ridx===0 ? 'LAST' : '';
+      badge.style.display = ridx===0 ? '' : 'none';
+    });
+  }
+
+  // Hook into setRcT / setScT — use event-based approach, no monkey-patching
+  document.addEventListener('fos:tmplChanged', e => {
+    trackRecent(e.detail.type, e.detail.n);
+  });
+
+  window.fosFavInit = function() {
+    refreshBadges('rc');
+    refreshBadges('sc');
+  };
+
+  // Listen on the EXISTING buttons (no monkey-patching setRcT/setScT needed)
+  document.querySelectorAll('#sideRc .tmpl-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('fos:tmplChanged',{detail:{type:'rc',n:i+1}}));
+    });
+  });
+  document.querySelectorAll('#sideSc .tmpl-btn').forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      document.dispatchEvent(new CustomEvent('fos:tmplChanged',{detail:{type:'sc',n:i+1}}));
+    });
+  });
+
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', window.fosFavInit);
+  } else {
+    window.fosFavInit();
+  }
+})();
+
+</script>
+</body>
+</html>

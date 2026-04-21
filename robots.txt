@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /app.html
+Allow: /view.html
+Allow: /templates.html
+
+Disallow: /print/
+
+Sitemap: https://future-of-student-by-hussain.vercel.app/sitemap.xml

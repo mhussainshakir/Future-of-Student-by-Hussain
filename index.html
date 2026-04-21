@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ===== SEO META TAGS ===== -->
+<title>Future of Student - Free Report Card & ID Card Generator</title>
+<meta name="description" content="Free online school report card generator and student ID card maker. Create professional academic mark sheets with 16 templates and student identity cards with 10 designs. No registration needed. Works offline as PWA.">
+<meta name="keywords" content="report card generator, student id card maker, academic mark sheet, school report card, student card generator, free report card maker, school result card, progress report generator, student identity card, marksheet generator">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Future of Student – by Hussain">
+<link rel="canonical" href="https://future-of-student-by-hussain.vercel.app/">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Free School Report Card Generator & Student ID Card Maker">
+<meta property="og:description" content="Create beautiful academic report cards and student ID cards instantly. 16 report card templates + 10 student card designs. Free, fast, works offline.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://future-of-student-by-hussain.vercel.app/">
+<meta property="og:image" content="https://future-of-student-by-hussain.vercel.app/icons/og-image.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free School Report Card & Student ID Card Generator">
+<meta name="twitter:description" content="Professional academic report cards and student ID cards. 16+10 beautiful templates. Free & offline ready.">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f3460">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Future of Student – by Hussain">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<!-- Structured Data for Google -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "School Report Card Generator & Student ID Card Maker",
+  "url": "https://future-of-student-by-hussain.vercel.app/",
+  "description": "Free online tool to generate school report cards and student identity cards with professional templates.",
+  "applicationCategory": "EducationApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "16 Report Card Templates",
+    "10 Student ID Card Templates",
+    "Auto Percentage Calculation",
+    "Print to PDF",
+    "Works Offline",
+    "No Registration Required"
+  ]
+}
+</script>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600;700;800&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --navy: #0f3460;
+  --red: #e94560;
+  --gold: #f5a623;
+  --dark: #1a1a2e;
+  --light: #f8faff;
+  --text: #2d3436;
+  --muted: #636e72;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Poppins', sans-serif; background: white; color: var(--text); overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  background: rgba(15, 52, 96, 0.97); backdrop-filter: blur(12px);
+  padding: 0 5%; display: flex; align-items: center; justify-content: space-between;
+  height: 64px; border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--red), var(--gold)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-weight: 700; color: white; font-size: 16px; }
+.nav-logo-text { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 700; color: white; letter-spacing: 1px; }
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: var(--gold); }
+.nav-cta { background: var(--red); color: white; padding: 9px 22px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; transition: transform 0.2s, background 0.2s; }
+.nav-cta:hover { background: #c23152; transform: translateY(-1px); }
+
+/* HERO */
+.hero {
+  min-height: 100vh; background: linear-gradient(150deg, #0f3460 0%, #16213e 40%, #1a1a2e 100%);
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 100px 5% 60px; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(233,69,96,0.15) 0%, transparent 70%);
+  top: -100px; right: -100px; border-radius: 50%;
+}
+.hero::after {
+  content: ''; position: absolute; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(245,166,35,0.1) 0%, transparent 70%);
+  bottom: -80px; left: -80px; border-radius: 50%;
+}
+.hero-content { position: relative; z-index: 1; max-width: 800px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: var(--gold); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  margin-bottom: 28px; letter-spacing: 1px; text-transform: uppercase;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif; font-size: clamp(36px, 6vw, 68px);
+  font-weight: 900; color: white; line-height: 1.1; margin-bottom: 20px;
+}
+.hero h1 span { color: var(--red); }
+.hero p {
+  font-size: clamp(15px, 2vw, 18px); color: rgba(255,255,255,0.75);
+  line-height: 1.8; margin-bottom: 40px; max-width: 580px; margin-left: auto; margin-right: auto;
+}
+.hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.btn-hero-primary {
+  background: linear-gradient(135deg, var(--red), #c23152); color: white;
+  padding: 16px 36px; border-radius: 12px; font-size: 15px; font-weight: 700;
+  text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 32px rgba(233,69,96,0.4);
+}
+.btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(233,69,96,0.5); }
+.btn-hero-secondary {
+  background: rgba(255,255,255,0.1); color: white; border: 1.5px solid rgba(255,255,255,0.3);
+  padding: 16px 36px; border-radius: 12px; font-size: 15px; font-weight: 600;
+  text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-hero-secondary:hover { background: rgba(255,255,255,0.2); transform: translateY(-3px); }
+.hero-stats {
+  display: flex; gap: 40px; justify-content: center; margin-top: 60px;
+  flex-wrap: wrap;
+}
+.stat { text-align: center; }
+.stat-num { font-family: 'Oswald', sans-serif; font-size: 36px; font-weight: 700; color: var(--gold); }
+.stat-label { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+
+/* CARDS SECTION */
+.section { padding: 80px 5%; }
+.section-header { text-align: center; margin-bottom: 56px; }
+.section-tag { display: inline-block; background: #fff0f3; color: var(--red); padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 14px; letter-spacing: 1px; text-transform: uppercase; }
+.section-tag.blue { background: #e8f0fd; color: var(--navy); }
+.section h2 { font-family: 'Playfair Display', serif; font-size: clamp(28px, 4vw, 44px); font-weight: 900; color: var(--dark); line-height: 1.2; margin-bottom: 14px; }
+.section p.sub { font-size: 16px; color: var(--muted); max-width: 540px; margin: 0 auto; line-height: 1.7; }
+
+/* MAIN APP CARDS */
+.app-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; max-width: 900px; margin: 0 auto; }
+.app-card {
+  border-radius: 20px; overflow: hidden; cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s; text-decoration: none;
+  position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+}
+.app-card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.app-card-rc { background: linear-gradient(145deg, #0f3460, #1a5276); }
+.app-card-sc { background: linear-gradient(145deg, #1a1a2e, #e94560 200%); }
+.app-card-inner { padding: 40px 36px; }
+.app-card-icon { font-size: 48px; margin-bottom: 20px; display: block; }
+.app-card h3 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: white; margin-bottom: 12px; }
+.app-card p { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; margin-bottom: 24px; }
+.app-card-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-right: 6px; margin-bottom: 6px; }
+.app-card-btn {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 24px;
+  background: white; color: var(--navy); padding: 12px 24px; border-radius: 10px;
+  font-size: 14px; font-weight: 700; transition: all 0.2s;
+}
+.app-card-rc .app-card-btn:hover { background: var(--gold); color: white; }
+.app-card-sc .app-card-btn { color: #e94560; }
+.app-card-sc .app-card-btn:hover { background: var(--red); color: white; }
+.card-decoration { position: absolute; bottom: -30px; right: -30px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+.card-decoration2 { position: absolute; bottom: 20px; right: 20px; width: 80px; height: 80px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+
+/* FEATURES */
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+.feature-card { background: white; border: 1.5px solid #eef0f5; border-radius: 16px; padding: 28px; transition: all 0.3s; }
+.feature-card:hover { border-color: var(--navy); box-shadow: 0 8px 32px rgba(15,52,96,0.1); transform: translateY(-4px); }
+.feature-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+.feature-icon.blue { background: #e8f0fd; }
+.feature-icon.red { background: #ffeef2; }
+.feature-icon.green { background: #e8fdf5; }
+.feature-icon.gold { background: #fff8e8; }
+.feature-icon.purple { background: #f3eeff; }
+.feature-icon.teal { background: #e0faf5; }
+.feature-card h4 { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+.feature-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+/* TEMPLATES PREVIEW */
+.templates-bg { background: var(--light); }
+.template-row { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; max-width: 1100px; margin: 0 auto; }
+.template-row::-webkit-scrollbar { height: 4px; }
+.template-row::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 2px; }
+.template-row::-webkit-scrollbar-thumb { background: var(--navy); border-radius: 2px; }
+.tmpl-preview { flex-shrink: 0; width: 180px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.12); transition: transform 0.2s; cursor: pointer; text-decoration: none; }
+.tmpl-preview:hover { transform: scale(1.04); }
+.tmpl-preview-header { height: 70px; display: flex; align-items: center; justify-content: center; padding: 12px; }
+.tmpl-preview-header span { font-size: 11px; font-weight: 700; color: white; text-align: center; letter-spacing: 0.5px; }
+.tmpl-preview-body { background: white; padding: 10px 12px; }
+.tmpl-preview-line { height: 6px; background: #e8e8e8; border-radius: 3px; margin-bottom: 5px; }
+.tmpl-preview-line.w60 { width: 60%; }
+.tmpl-preview-line.w80 { width: 80%; }
+.tmpl-preview-label { font-size: 10px; color: #888; font-weight: 600; text-align: center; margin-top: 8px; }
+
+/* HOW IT WORKS */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; max-width: 900px; margin: 0 auto; }
+.step { text-align: center; padding: 28px 20px; }
+.step-num { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--navy), #2e5daa); color: white; font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.step h4 { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+.step p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.step-arrow { display: flex; align-items: center; justify-content: center; font-size: 24px; color: #ccc; padding-top: 24px; }
+
+/* PWA INSTALL BANNER */
+.pwa-banner {
+  background: linear-gradient(135deg, #0f3460, #16213e); padding: 60px 5%;
+  text-align: center;
+}
+.pwa-banner h2 { font-family: 'Playfair Display', serif; font-size: 32px; color: white; margin-bottom: 12px; }
+.pwa-banner p { font-size: 15px; color: rgba(255,255,255,0.75); margin-bottom: 28px; }
+.pwa-features { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+.pwa-feat { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 500; }
+.pwa-feat-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+.install-btn {
+  background: var(--gold); color: var(--dark); padding: 14px 36px; border-radius: 12px;
+  font-size: 15px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.2s; cursor: pointer; border: none;
+}
+.install-btn:hover { background: #e6951a; transform: translateY(-2px); }
+#installBtnWrap { display: none; }
+
+/* FAQ */
+.faq-list { max-width: 720px; margin: 0 auto; }
+.faq-item { border-bottom: 1px solid #eef0f5; }
+.faq-q {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 0; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--dark);
+  gap: 16px;
+}
+.faq-q:hover { color: var(--navy); }
+.faq-arrow { font-size: 18px; color: var(--navy); transition: transform 0.3s; flex-shrink: 0; }
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+.faq-a { font-size: 14px; color: var(--muted); line-height: 1.7; max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s; }
+.faq-item.open .faq-a { max-height: 200px; padding-bottom: 16px; }
+
+/* FOOTER */
+footer { background: var(--dark); color: rgba(255,255,255,0.6); padding: 40px 5%; text-align: center; }
+footer .footer-logo { font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; color: white; margin-bottom: 10px; }
+footer p { font-size: 13px; line-height: 1.7; }
+footer .footer-links { display: flex; gap: 20px; justify-content: center; margin: 16px 0; flex-wrap: wrap; }
+footer .footer-links a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+footer .footer-links a:hover { color: var(--gold); }
+
+/* MOBILE */
+@media (max-width: 700px) {
+  .app-cards { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .hero-stats { gap: 24px; }
+  .stat-num { font-size: 28px; }
+}
+
+/* ANIMATIONS */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.hero-content > * { animation: fadeInUp 0.7s ease both; }
+.hero-badge { animation-delay: 0.1s; }
+.hero h1 { animation-delay: 0.2s; }
+.hero p { animation-delay: 0.3s; }
+.hero-btns { animation-delay: 0.4s; }
+.hero-stats { animation-delay: 0.5s; }
+/* ===== DARK MODE ===== */
+body.dark {
+  --navy: #5b8dee;
+  --red: #ff6b81;
+  --gold: #ffd32a;
+  --dark: #0d1117;
+  --light: #161b22;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  background: #0d1117;
+  color: #e6edf3;
+}
+body.dark nav { background: rgba(13,17,23,0.97); border-bottom: 1px solid rgba(255,255,255,0.06); }
+body.dark .section { background: #0d1117; }
+body.dark .templates-bg { background: #161b22; }
+body.dark .feature-card { background: #161b22; border-color: #30363d; }
+body.dark .feature-card:hover { border-color: #5b8dee; }
+body.dark .feature-card h4 { color: #e6edf3; }
+body.dark .feature-card p { color: #8b949e; }
+body.dark .app-card { box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+body.dark .section h2 { color: #e6edf3; }
+body.dark .section p.sub { color: #8b949e; }
+body.dark .section-tag { background: #21262d; color: #ff6b81; }
+body.dark .section-tag.blue { background: #1c2a3f; color: #5b8dee; }
+body.dark .tmpl-preview { box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+body.dark .tmpl-preview-body { background: #161b22; }
+body.dark .tmpl-preview-line { background: #30363d; }
+body.dark .tmpl-preview-label { color: #8b949e; background: #161b22; }
+body.dark .step h4 { color: #e6edf3; }
+body.dark .step p { color: #8b949e; }
+body.dark .faq-item { border-color: #30363d; }
+body.dark .faq-q { color: #e6edf3; }
+body.dark .faq-q:hover { color: #5b8dee; }
+body.dark .faq-a { color: #8b949e; }
+body.dark footer { background: #010409; }
+body.dark .hero { background: linear-gradient(150deg, #010409 0%, #0d1117 40%, #161b22 100%); }
+body.dark .pwa-banner { background: linear-gradient(135deg, #010409, #0d1117); }
+
+/* ===== TEMPLATE CARD SMOOTH HOVER ===== */
+.tmpl-preview {
+  transition: transform 0.2s cubic-bezier(.22,.68,0,1.2), box-shadow 0.2s ease;
+}
+.tmpl-preview:hover {
+  transform: scale(1.06) translateY(-3px);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.22) !important;
+}
+.app-card {
+  transition: transform 0.3s cubic-bezier(.22,.68,0,1.15), box-shadow 0.3s ease;
+}
+
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-icon">FOS</div>
+    <span class="nav-logo-text">Future of Student – by Hussain</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#templates">Templates</a></li>
+    <li><a href="templates.html" style="color:var(--gold)">✍️ Manual Templates</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="./templates.html" style="color:var(--gold)">✍ Templates</a></li>
+  </ul>
+  <a href="app.html" class="nav-cta">🚀 Launch App Free</a>
+  <button id="themeToggle" onclick="toggleTheme()" title="Toggle Light/Dark" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:white;padding:8px 13px;border-radius:8px;font-size:16px;cursor:pointer;margin-left:8px;transition:all 0.2s;line-height:1">🌙</button>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">⭐ Free • No Registration • Works Offline</div>
+    <h1>Professional School<br><span>Report Cards</span> &<br>Student ID Cards</h1>
+    <p>Generate beautiful academic mark sheets and student identity cards in seconds. Choose from 116 report card templates and 20 student card designs. Print-ready, customizable, and completely free.</p>
+    <div class="hero-btns">
+      <a href="app.html?tab=rc" class="btn-hero-primary">📋 Generate Report Card</a>
+      <a href="app.html?tab=sc" class="btn-hero-secondary">🪪 Make Student Card</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">16</div><div class="stat-label">Report Card Templates</div></div>
+      <div class="stat"><div class="stat-num">20</div><div class="stat-label">Student Card Designs</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free Forever</div></div>
+      <div class="stat"><div class="stat-num">PWA</div><div class="stat-label">Works Offline</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN APP CARDS -->
+<section class="section" id="generate">
+  <div class="section-header">
+    <div class="section-tag">Get Started Now</div>
+    <h2>What Do You Want to Create?</h2>
+    <p class="sub">Choose below to open the generator. Everything runs in your browser — no data leaves your device.</p>
+  </div>
+  <div class="app-cards" style="grid-template-columns:1fr 1fr;max-width:900px;margin:0 auto">
+    <a href="app.html?tab=rc" class="app-card app-card-rc">
+      <div class="card-decoration"></div>
+      <div class="card-decoration2"></div>
+      <div class="app-card-inner">
+        <span class="app-card-icon">📋</span>
+        <h3>Generate Report Card</h3>
+        <p>Create professional academic mark sheets with custom subjects, auto-calculated percentages, grades, observations, teacher signatures and general remarks.</p>
+        <div>
+          <span class="app-card-tag">16 Templates</span>
+          <span class="app-card-tag">Auto %</span>
+          <span class="app-card-tag">Print Ready</span>
+        </div>
+        <div class="app-card-btn">Open Report Card Generator →</div>
+      </div>
+    </a>
+    <a href="app.html?tab=sc" class="app-card app-card-sc">
+      <div class="card-decoration"></div>
+      <div class="card-decoration2"></div>
+      <div class="app-card-inner">
+        <span class="app-card-icon">🪪</span>
+        <h3>Generate Student ID Card</h3>
+        <p>Design credit-card sized student identity cards with photo, front & back sides, auto expiry dates (1yr / 2yr), blood group, hologram and chip designs.</p>
+        <div>
+          <span class="app-card-tag">20 Templates</span>
+          <span class="app-card-tag">Front + Back</span>
+          <span class="app-card-tag">Auto Expiry</span>
+        </div>
+        <div class="app-card-btn">Open Student Card Generator →</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- NEW: Report Card Templates Manual -->
+  <div style="max-width:900px;margin:24px auto 0">
+    <a href="templates.html" class="app-card" style="display:block;background:linear-gradient(145deg,#1a1a2e,#2d3060);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;box-shadow:0 8px 40px rgba(0,0,0,0.12);position:relative">
+      <div class="card-decoration"></div>
+      <div class="card-decoration2"></div>
+      <div class="app-card-inner" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px">
+        <div>
+          <span class="app-card-icon" style="font-size:38px;margin-bottom:12px">✍️</span>
+          <h3 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:white;margin-bottom:10px">Report Card Templates</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,0.75);line-height:1.7;margin-bottom:16px;max-width:520px">15 professional A4 printable templates for handwriting. All fields are blank lines — print and fill by hand. Includes PDF/PNG download, favorites, watermark option, and more.</p>
+          <div>
+            <span class="app-card-tag" style="background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:var(--gold)">15 Templates</span>
+            <span class="app-card-tag" style="background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:var(--gold)">Manual / Handwriting</span>
+            <span class="app-card-tag" style="background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:var(--gold)">PDF + PNG Download</span>
+            <span class="app-card-tag" style="background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);color:var(--gold)">Favorites & Watermark</span>
+          </div>
+        </div>
+        <div class="app-card-btn" style="background:var(--gold);color:var(--dark);flex-shrink:0;font-size:14px;padding:14px 28px">✍️ Open Templates →</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section templates-bg" id="features">
+  <div class="section-header">
+    <div class="section-tag blue">Features</div>
+    <h2>Everything a School Needs</h2>
+    <p class="sub">Powerful tools built specifically for teachers, school administrators, and students.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon blue">📊</div>
+      <h4>Auto Percentage & Grade</h4>
+      <p>Enter obtained marks and full marks — percentage and grade calculate automatically using your custom grade scale (A+, A, B+, etc.).</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon red">🎨</div>
+      <h4>16 Unique Report Card Designs</h4>
+      <p>Classic Navy, Dark Elite, Regal Crest, Midnight Neon, Soft Bloom and 11 more — each completely different in style, font and color.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon purple">🪪</div>
+      <h4>20 Student Card Designs</h4>
+      <p>10 portrait + 10 landscape cards — Neon Cyber, Marble White, Deep Space, Coral Sunset and many more. All unique front & back.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon gold">⏰</div>
+      <h4>Smart Expiry Calculation</h4>
+      <p>Student ID cards auto-calculate expiry: 1 year for classes below 9, 2 years for class 9 and above. As per school policy.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon green">🖨️</div>
+      <h4>Print & Save as PDF</h4>
+      <p>One-click print that opens a clean printable window. Save as PDF directly from browser. No extra software needed.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon teal">📱</div>
+      <h4>PWA — Install Like an App</h4>
+      <p>Install on your phone or computer like a native app. Works fully offline. No internet needed after first load.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TEMPLATE PREVIEWS -->
+<section class="section" id="templates">
+  <div class="section-header">
+    <div class="section-tag">Templates</div>
+    <h2>Report Card Template Preview</h2>
+    <p class="sub">16 completely unique designs — scroll to see all. Click any to open the app with that template selected.</p>
+  </div>
+  <div class="template-row">
+    <a href="app.html?tab=rc&tmpl=1" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#1a3a6e,#2e5daa)"><span>Classic Navy</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 1</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=2" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#ff6b35,#f7c948)"><span>Modern Orange</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 2</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=3" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#2d6a4f,#1b4332)"><span>Forest Green</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 3</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=4" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#1a1a2e,#e94560)"><span>Dark Elite</span></div>
+      <div class="tmpl-preview-body" style="background:#1f1f35"><div class="tmpl-preview-line w80" style="background:#333"></div><div class="tmpl-preview-line w60" style="background:#333"></div><div class="tmpl-preview-line w80" style="background:#333"></div></div>
+      <div class="tmpl-preview-label">Template 4</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=5" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#7c3aed,#db2777)"><span>Gradient Pro</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 5</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=6" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#0044cc,#1b6bff)"><span>Royal Blue</span></div>
+      <div class="tmpl-preview-body" style="background:#f7f9ff"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 6</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=7" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#8b0000,#cc0000)"><span>Crimson Ledger</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 7</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=8" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#37474f,#546e7a)"><span>Slate Ribbon</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 8</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=9" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#00b4d8,#0077b6)"><span>Aurora Arc</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 9</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=10" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#1565c0,#205493)"><span>Blueprint Mono</span></div>
+      <div class="tmpl-preview-body" style="background:#f4f8ff"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 10</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=11" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(120deg,#ff6a3d,#ff9f43)"><span>Festival Stripe</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 11</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=12" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:#faf7f0;border-bottom:3px double #3b2f2f"><span style="color:#3b2f2f">Editorial Serif</span></div>
+      <div class="tmpl-preview-body" style="background:#faf7f0"><div class="tmpl-preview-line w80" style="background:#d9cfbf"></div><div class="tmpl-preview-line w60" style="background:#d9cfbf"></div><div class="tmpl-preview-line w80" style="background:#d9cfbf"></div><div class="tmpl-preview-line w60" style="background:#d9cfbf"></div></div>
+      <div class="tmpl-preview-label">Template 12</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=13" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#1b2252,#193f7a)"><span style="color:#7ef7e7">Midnight Neon</span></div>
+      <div class="tmpl-preview-body" style="background:#111427"><div class="tmpl-preview-line w80" style="background:#2b3258"></div><div class="tmpl-preview-line w60" style="background:#2b3258"></div><div class="tmpl-preview-line w80" style="background:#2b3258"></div><div class="tmpl-preview-line w60" style="background:#2b3258"></div></div>
+      <div class="tmpl-preview-label">Template 13</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=14" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#f7c7d5,#ee93af)"><span style="color:#542738">Soft Bloom</span></div>
+      <div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 14</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=15" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(135deg,#5d4428,#7a5a35)"><span style="color:#f7e3b5">Regal Crest</span></div>
+      <div class="tmpl-preview-body" style="background:#fffdf9"><div class="tmpl-preview-line w80" style="background:#e7d8c7"></div><div class="tmpl-preview-line w60" style="background:#e7d8c7"></div><div class="tmpl-preview-line w80" style="background:#e7d8c7"></div><div class="tmpl-preview-line w60" style="background:#e7d8c7"></div></div>
+      <div class="tmpl-preview-label">Template 15</div>
+    </a>
+    <a href="app.html?tab=rc&tmpl=16" class="tmpl-preview">
+      <div class="tmpl-preview-header" style="background:linear-gradient(90deg,#10355f,#1a4b80)"><span>Data Grid</span></div>
+      <div class="tmpl-preview-body" style="background:#f8fbff"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div>
+      <div class="tmpl-preview-label">Template 16</div>
+    </a>
+  </div>
+
+  <div style="margin-top:48px">
+    <div class="section-header" style="margin-bottom:32px">
+      <h2 style="font-size:32px">Student ID Card Designs</h2>
+      <p class="sub">20 unique designs — 10 portrait + 10 landscape, each with front & back. Scroll to see all.</p>
+    </div>
+    <div class="template-row">
+      <a href="app.html?tab=sc&tmpl=1" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#0f3460,#1a5276)"><span>Classic Blue</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 1</div></a>
+      <a href="app.html?tab=sc&tmpl=2" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(90deg,#00b894,#00cec9)"><span>Fresh Green</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 2</div></a>
+      <a href="app.html?tab=sc&tmpl=3" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#1a1a2e,#2d1b69)"><span>Royal Gold</span></div><div class="tmpl-preview-body" style="background:#1a1a2e"><div class="tmpl-preview-line w80" style="background:#333"></div><div class="tmpl-preview-line w60" style="background:#333"></div></div><div class="tmpl-preview-label">Portrait 3</div></a>
+      <a href="app.html?tab=sc&tmpl=4" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#e74c3c,#c0392b)"><span>Bold Red</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 4</div></a>
+      <a href="app.html?tab=sc&tmpl=5" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#74b9ff,#0984e3)"><span>Sky Blue</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 5</div></a>
+      <a href="app.html?tab=sc&tmpl=6" class="tmpl-preview"><div class="tmpl-preview-header" style="background:#111"><span style="color:#ffd700">Black Premium</span></div><div class="tmpl-preview-body" style="background:#111"><div class="tmpl-preview-line w80" style="background:#333"></div><div class="tmpl-preview-line w60" style="background:#333"></div></div><div class="tmpl-preview-label">Portrait 6</div></a>
+      <a href="app.html?tab=sc&tmpl=7" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#8e44ad,#3498db)"><span>Purple Grad.</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 7</div></a>
+      <a href="app.html?tab=sc&tmpl=8" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(90deg,#11998e,#38ef7d)"><span>Teal Wave</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 8</div></a>
+      <a href="app.html?tab=sc&tmpl=9" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#f39c12,#e74c3c)"><span>Orange Geo</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 9</div></a>
+      <a href="app.html?tab=sc&tmpl=10" class="tmpl-preview"><div class="tmpl-preview-header" style="background:#2d3436"><span>Minimalist</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Portrait 10</div></a>
+      <a href="app.html?tab=sc&tmpl=11" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(160deg,#ff6b6b,#feca57)"><span>Coral Sunset</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Landscape 11</div></a>
+      <a href="app.html?tab=sc&tmpl=12" class="tmpl-preview"><div class="tmpl-preview-header" style="background:radial-gradient(ellipse,#1a1040,#040412)"><span>Deep Space</span></div><div class="tmpl-preview-body" style="background:#040412"><div class="tmpl-preview-line w80" style="background:#a29bfe44"></div><div class="tmpl-preview-line w60" style="background:#a29bfe44"></div></div><div class="tmpl-preview-label">Landscape 12</div></a>
+      <a href="app.html?tab=sc&tmpl=13" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#1b5e20,#2e7d32)"><span>Forest Pine</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Landscape 13</div></a>
+      <a href="app.html?tab=sc&tmpl=14" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#ffeaa7,#fd79a8)"><span>Pastel Pink</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Landscape 14</div></a>
+      <a href="app.html?tab=sc&tmpl=15" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#2c3e50,#34495e)"><span>Chrome Dark</span></div><div class="tmpl-preview-body" style="background:#1a252f"><div class="tmpl-preview-line w80" style="background:#444"></div><div class="tmpl-preview-line w60" style="background:#444"></div></div><div class="tmpl-preview-label">Landscape 15</div></a>
+      <a href="app.html?tab=sc&tmpl=16" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#4834d4,#686de0)"><span>Indigo Wave</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Landscape 16</div></a>
+      <a href="app.html?tab=sc&tmpl=17" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(90deg,#f5a623,#f7c948)"><span>Sunrise Gold</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Landscape 17</div></a>
+      <a href="app.html?tab=sc&tmpl=18" class="tmpl-preview"><div class="tmpl-preview-header" style="background:#f7f4f0;border-bottom:2px solid #c8bfb5"><span style="color:#3e3028">Marble White</span></div><div class="tmpl-preview-body"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Landscape 18</div></a>
+      <a href="app.html?tab=sc&tmpl=19" class="tmpl-preview"><div class="tmpl-preview-header" style="background:#0d0d1a"><span style="color:#00ffb3">Neon Cyber</span></div><div class="tmpl-preview-body" style="background:#0d0d1a"><div class="tmpl-preview-line w80" style="background:rgba(0,255,179,0.3)"></div><div class="tmpl-preview-line w60" style="background:rgba(0,255,179,0.2)"></div></div><div class="tmpl-preview-label">Landscape 19</div></a>
+      <a href="app.html?tab=sc&tmpl=20" class="tmpl-preview"><div class="tmpl-preview-header" style="background:linear-gradient(135deg,#8b5e3c,#a0722a)"><span style="color:#f7e3b5">Classic Brown</span></div><div class="tmpl-preview-body" style="background:#f7f0e8"><div class="tmpl-preview-line w80"></div><div class="tmpl-preview-line w60"></div></div><div class="tmpl-preview-label">Landscape 20</div></a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section templates-bg" id="how-it-works">
+  <div class="section-header">
+    <div class="section-tag blue">Simple Process</div>
+    <h2>How It Works</h2>
+    <p class="sub">Create your report card or student ID in just 4 easy steps.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>Choose a Template</h4>
+      <p>Select from 16 report card designs or 20 student card templates — all completely different styles.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>Enter Your Info</h4>
+      <p>Type student name, school name, subjects and marks. Everything updates live as you type.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>See Live Preview</h4>
+      <p>Your card or report card appears instantly on the right. Percentage and grades auto-calculate.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h4>Print or Save PDF</h4>
+      <p>Click the Print button. Choose "Save as PDF" in your browser to download, or print directly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PWA INSTALL -->
+<section class="pwa-banner" id="install">
+  <h2>📱 Install as App on Your Phone</h2>
+  <p>Use Future of Student – by Hussain offline — install it like a native app. Works on Android, iPhone, and Desktop.</p>
+  <div class="pwa-features">
+    <div class="pwa-feat"><div class="pwa-feat-dot"></div>Works without internet</div>
+    <div class="pwa-feat"><div class="pwa-feat-dot"></div>Installs to home screen</div>
+    <div class="pwa-feat"><div class="pwa-feat-dot"></div>Loads instantly</div>
+    <div class="pwa-feat"><div class="pwa-feat-dot"></div>No app store needed</div>
+  </div>
+  <div id="installBtnWrap">
+    <button class="install-btn" id="installBtn">📲 Install App Now</button>
+  </div>
+  <p style="font-size:13px;margin-top:16px">On mobile: tap the Share button → "Add to Home Screen" | On Chrome Desktop: click the install icon in the address bar</p>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-header">
+    <div class="section-tag">FAQ</div>
+    <h2>Frequently Asked Questions</h2>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Is this report card generator completely free? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Yes, 100% free. No registration, no watermarks, no hidden fees. All 16 report card templates and 20 student card designs are free to use forever.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Do I need to register or create an account? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">No account needed. Open the app, fill in your details, and download or print. Your data stays only in your browser — we don't save anything to any server.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How do I add my own school name and logo? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">In the app sidebar, type your school name in the "School Name" field. It updates live on the template. You can also customize the logo initials in Settings.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can I add or remove subjects from the report card? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Yes. Click "Add Subject" to add a new row, type the subject name, full marks and obtained marks. Click ✕ to remove any subject. You can have unlimited subjects.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How does the student card expiry work? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Enter the student's class number. If class is 9 or above, the card expires in 2 years from issue date. If below class 9, it expires in 1 year. The expiry date is calculated and printed automatically on the card back.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How to print the report card or student ID card? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Click the 🖨 Print button in the top-right of the app. A print window opens. Choose your printer or select "Save as PDF" to download. Student cards are sized exactly like a credit card.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Does it work on mobile phones? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Yes. The app works on all modern mobile browsers. You can also install it as a PWA (Progressive Web App) — tap Share → Add to Home Screen on iPhone, or install from Chrome on Android.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Future of Student – by Hussain</div>
+  <p>Free Academic Report Card Generator & Student ID Card Maker</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="app.html?tab=rc">Report Card</a>
+    <a href="app.html?tab=sc">Student Card</a>
+    <a href="templates.html">Manual Templates</a>
+  </div>
+  <p style="font-size:12px;margin-top:8px">Built for teachers, schools and students. Works offline. No data stored.</p>
+</footer>
+
+<div id="floatInstallBanner" style="display:none;position:fixed;bottom:20px;right:20px;background:linear-gradient(135deg,#0f3460,#1a5276);color:white;padding:12px 18px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:999;align-items:center;gap:12px;font-size:13px;max-width:320px">
+  <span>📲 Install this app for offline use!</span>
+  <button onclick="if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>deferredPrompt=null);}document.getElementById('floatInstallBanner').style.display='none'" style="background:#f5a623;color:#1a1a2e;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px">Install</button>
+  <button onclick="document.getElementById('floatInstallBanner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:18px;line-height:1;padding:0">×</button>
+</div>
+
+<script>
+// FAQ Toggle
+function toggleFaq(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+// ===== DARK / LIGHT THEME =====
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  const btn = document.getElementById('themeToggle');
+  btn.textContent = isDark ? '☀️' : '🌙';
+  btn.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+  localStorage.setItem('scpTheme', isDark ? 'dark' : 'light');
+}
+// Apply saved theme on load
+(function(){
+  const saved = localStorage.getItem('scpTheme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && prefersDark)) {
+    document.body.classList.add('dark');
+    const btn = document.getElementById('themeToggle');
+    if (btn) { btn.textContent = '☀️'; btn.title = 'Switch to Light Mode'; }
+  }
+})();
+
+// PWA Install
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtnWrap').style.display = 'block';
+  // Also show floating install banner
+  const fb = document.getElementById('floatInstallBanner');
+  if(fb) fb.style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBtnWrap').style.display = 'none';
+  const fb = document.getElementById('floatInstallBanner');
+  if(fb) fb.style.display = 'none';
+  deferredPrompt = null;
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById('installBtnWrap').style.display = 'none';
+  }
+});
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// Template link clicks from homepage — store in sessionStorage for app.html to read
+document.querySelectorAll('a[href*="app.html"]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    const url = new URL(a.href, location.href);
+    const tab = url.searchParams.get('tab');
+    const tmpl = url.searchParams.get('tmpl');
+    if (tab) sessionStorage.setItem('startTab', tab);
+    if (tmpl) sessionStorage.setItem('startTmpl', tmpl);
+  });
+});
+</script>
+</body>
+</html>
